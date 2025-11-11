@@ -154,7 +154,7 @@ Un dashboard web moderne est disponible dans le dossier `dashboard/` pour visual
 
 ### Déploiement
 
-Voir le [README du dashboard](dashboard/README.md) pour les instructions complètes.
+Voir la documentation dans le dossier `docs/` (local uniquement) pour les instructions complètes.
 
 **Déploiement rapide sur Vercel :**
 1. Allez dans le dossier `dashboard/`
