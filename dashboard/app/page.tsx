@@ -42,10 +42,21 @@ export default function Home() {
       }
     })
 
-    // Si on a un code, attendre que la session soit créée
+    // Si on a un code, vérifier d'abord si la session existe déjà
+    // (Supabase peut avoir déjà traité le code)
     if (code) {
-      // Le callback OAuth est en cours, on attend l'événement SIGNED_IN
-      // Ne rien faire ici, onAuthStateChange gérera la redirection
+      // Vérifier immédiatement si la session existe
+      checkUser().then(() => {
+        // Si pas de session après 2 secondes, vérifier à nouveau
+        // (au cas où Supabase traite le code de manière asynchrone)
+        setTimeout(async () => {
+          const { data: { session } } = await supabase.auth.getSession()
+          if (!session) {
+            // Toujours pas de session, arrêter le loading pour éviter une boucle infinie
+            setLoading(false)
+          }
+        }, 2000)
+      })
     } else {
       // Vérifier la session normale
       checkUser()
