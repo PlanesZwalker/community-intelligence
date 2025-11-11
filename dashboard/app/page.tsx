@@ -15,8 +15,46 @@ export default function Home() {
   const [user, setUser] = useState<any>(null)
 
   useEffect(() => {
-    checkUser()
-  }, [])
+    // Vérifier s'il y a un code dans l'URL (callback OAuth)
+    const urlParams = new URLSearchParams(window.location.search)
+    const code = urlParams.get('code')
+    const error = urlParams.get('error')
+    const errorDescription = urlParams.get('error_description')
+    
+    if (error) {
+      console.error('Erreur OAuth:', error, errorDescription)
+      setLoading(false)
+      return
+    }
+
+    // Écouter les changements de session (important pour le callback OAuth)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        setUser(session.user)
+        // Nettoyer l'URL des paramètres OAuth
+        window.history.replaceState({}, '', '/')
+        router.push('/dashboard')
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null)
+        setLoading(false)
+      } else if (event === 'TOKEN_REFRESHED' && session) {
+        setUser(session.user)
+      }
+    })
+
+    // Si on a un code, attendre que la session soit créée
+    if (code) {
+      // Le callback OAuth est en cours, on attend l'événement SIGNED_IN
+      // Ne rien faire ici, onAuthStateChange gérera la redirection
+    } else {
+      // Vérifier la session normale
+      checkUser()
+    }
+
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [router])
 
   async function checkUser() {
     const { data: { session } } = await supabase.auth.getSession()
@@ -32,7 +70,7 @@ export default function Home() {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'discord',
       options: {
-        redirectTo: `${window.location.origin}/dashboard`,
+        redirectTo: `${window.location.origin}/`,
         scopes: 'identify email guilds',
       },
     })
