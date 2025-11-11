@@ -128,9 +128,19 @@ export const commands = [
     description: 'Génère un résumé intelligent avec IA (nécessite clé API)',
     execute: async (interaction, client) => {
       console.log('🤖 Commande /ci-ai-summary exécutée');
+      console.log(`   Serveur: ${interaction.guild?.name} (${interaction.guild?.id})`);
       await interaction.deferReply();
 
-      if (!process.env.GROQ_API_KEY && !process.env.OPENAI_API_KEY && !process.env.ANTHROPIC_API_KEY) {
+      // Vérifier les clés API disponibles
+      const hasGroq = !!process.env.GROQ_API_KEY;
+      const hasOpenAI = !!process.env.OPENAI_API_KEY;
+      const hasAnthropic = !!process.env.ANTHROPIC_API_KEY;
+      const provider = process.env.AI_PROVIDER || 'groq';
+      
+      console.log(`   Clés API disponibles: Groq=${hasGroq}, OpenAI=${hasOpenAI}, Anthropic=${hasAnthropic}`);
+      console.log(`   Provider configuré: ${provider}`);
+
+      if (!hasGroq && !hasOpenAI && !hasAnthropic) {
         console.log('❌ Aucune clé API IA configurée');
         return interaction.editReply({
           content: '❌ Aucune clé API IA configurée. Ajoutez `GROQ_API_KEY` dans vos variables d\'environnement.\n💡 Groq est gratuit : https://console.groq.com',
@@ -138,27 +148,53 @@ export const commands = [
       }
 
       console.log('📊 Génération du résumé IA...');
-      const summary = await getWeeklySummary(interaction.guild.id, client.supabase, true);
-      console.log('📊 Résumé généré, aiSummary:', !!summary.aiSummary);
+      try {
+        const summary = await getWeeklySummary(interaction.guild.id, client.supabase, true);
+        console.log('📊 Résumé généré');
+        console.log(`   aiSummary existe: ${!!summary.aiSummary}`);
+        console.log(`   aiSummary type: ${typeof summary.aiSummary}`);
+        console.log(`   aiSummary longueur: ${summary.aiSummary?.length || 0}`);
+        console.log(`   aiSummary début: ${summary.aiSummary?.substring(0, 100) || 'null'}`);
 
-      if (!summary.aiSummary) {
-        console.log('❌ Aucun résumé IA généré');
-        return interaction.editReply({
-          content: '❌ Impossible de générer le résumé IA. Vérifiez votre configuration ou attendez qu\'il y ait plus de messages dans le serveur.',
+        // Vérifier si aiSummary est null, undefined, vide, ou une chaîne d'erreur
+        if (!summary.aiSummary || 
+            summary.aiSummary.trim() === '' || 
+            summary.aiSummary.startsWith('❌')) {
+          console.log('❌ Aucun résumé IA valide généré');
+          console.log(`   Valeur aiSummary: "${summary.aiSummary}"`);
+          
+          // Vérifier s'il y a des messages dans la base
+          const { data: messageCount } = await client.supabase
+            .from('messages')
+            .select('message_id', { count: 'exact', head: true })
+            .eq('guild_id', interaction.guild.id);
+          
+          console.log(`   Nombre de messages dans la base: ${messageCount || 0}`);
+          
+          return interaction.editReply({
+            content: `❌ Impossible de générer le résumé IA.\n\n**Causes possibles :**\n- Aucun message dans la base de données (${messageCount || 0} messages trouvés)\n- Erreur de l'API IA (vérifiez les logs)\n- Clé API invalide ou quota dépassé\n\n💡 Essayez d'abord `/ci-sync-history` pour synchroniser les messages.`,
+          });
+        }
+
+        const embed = new EmbedBuilder()
+          .setTitle('🤖 Résumé intelligent (IA)')
+          .setColor(0x9B59B6)
+          .setDescription(summary.aiSummary.substring(0, 4096)) // Limite Discord
+          .addFields(
+            { name: '📊 Stats de base', value: summary.description, inline: false }
+          )
+          .setTimestamp()
+          .setFooter({ text: 'Community Intelligence Bot - Powered by AI' });
+
+        await interaction.editReply({ embeds: [embed] });
+        console.log('✅ Résumé IA envoyé avec succès');
+      } catch (error) {
+        console.error('❌ Erreur lors de la génération du résumé IA:', error);
+        console.error('   Stack:', error.stack);
+        await interaction.editReply({
+          content: `❌ Erreur lors de la génération du résumé IA: ${error.message}\n\nVérifiez les logs pour plus de détails.`,
         });
       }
-
-      const embed = new EmbedBuilder()
-        .setTitle('🤖 Résumé intelligent (IA)')
-        .setColor(0x9B59B6)
-        .setDescription(summary.aiSummary)
-        .addFields(
-          { name: '📊 Stats de base', value: summary.description, inline: false }
-        )
-        .setTimestamp()
-        .setFooter({ text: 'Community Intelligence Bot - Powered by AI' });
-
-      await interaction.editReply({ embeds: [embed] });
     },
   },
   {
@@ -193,18 +229,26 @@ export const commands = [
     name: 'ci-sync-history',
     description: 'Synchronise l\'historique des messages depuis Discord vers la base de données',
     execute: async (interaction, client) => {
-      await interaction.deferReply({ ephemeral: true });
-
+      console.log('🔄 Commande /ci-sync-history exécutée');
+      console.log(`   Serveur: ${interaction.guild?.name} (${interaction.guild?.id})`);
+      console.log(`   Utilisateur: ${interaction.user?.tag} (${interaction.user?.id})`);
+      
       try {
+        await interaction.deferReply({ ephemeral: true });
+        console.log('   ✅ Réponse différée');
+
         await interaction.editReply({
           content: '🔄 Synchronisation de l\'historique en cours... Cela peut prendre plusieurs minutes.',
         });
+        console.log('   ✅ Message initial envoyé');
 
+        console.log('   🔄 Démarrage de syncHistory...');
         const stats = await syncHistory(client, client.supabase, {
           limit: 100, // 100 messages par canal
           maxChannels: 50, // Maximum 50 canaux par serveur
           delayBetweenChannels: 1000, // 1 seconde entre chaque canal
         });
+        console.log('   ✅ syncHistory terminée:', stats);
 
         const embed = new EmbedBuilder()
           .setTitle('✅ Synchronisation terminée')
@@ -222,11 +266,17 @@ export const commands = [
           content: null,
           embeds: [embed],
         });
+        console.log('   ✅ Message final envoyé avec les statistiques');
       } catch (error) {
-        console.error('Erreur lors de la synchronisation:', error);
-        await interaction.editReply({
-          content: `❌ Erreur lors de la synchronisation: ${error.message}`,
-        });
+        console.error('❌ Erreur lors de la synchronisation:', error);
+        console.error('   Stack:', error.stack);
+        try {
+          await interaction.editReply({
+            content: `❌ Erreur lors de la synchronisation: ${error.message}`,
+          });
+        } catch (replyError) {
+          console.error('❌ Impossible d\'envoyer le message d\'erreur:', replyError);
+        }
       }
     },
   },

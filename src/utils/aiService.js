@@ -42,8 +42,10 @@ Résumé (max 500 mots) :`;
         return await generateWithGroq(prompt);
     }
   } catch (error) {
-    console.error(`Erreur avec ${provider}:`, error);
-    return '❌ Erreur lors de la génération du résumé.';
+    console.error(`❌ Erreur avec ${provider}:`, error);
+    console.error(`   Message: ${error.message}`);
+    console.error(`   Stack: ${error.stack}`);
+    throw error; // Propager l'erreur au lieu de retourner une chaîne
   }
 }
 
@@ -101,7 +103,7 @@ async function generateWithGroq(prompt) {
           console.warn(`⚠️ Modèle ${model} décommissionné, essai du modèle suivant...`);
           continue;
         }
-        throw new Error(`Groq API error: ${errorText}`);
+        throw new Error(`Groq API error (${response.status}): ${errorText.substring(0, 200)}`);
       }
 
       const data = await response.json();
@@ -111,8 +113,11 @@ async function generateWithGroq(prompt) {
       }
       return content;
     } catch (error) {
+      console.error(`❌ Exception avec le modèle ${model}:`, error.message);
+      
       // Si c'est la dernière tentative, propager l'erreur
       if (model === models[models.length - 1]) {
+        console.error(`❌ Tous les modèles Groq ont échoué`);
         throw error;
       }
       // Sinon, continuer avec le modèle suivant

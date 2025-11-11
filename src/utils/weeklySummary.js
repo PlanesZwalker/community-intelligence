@@ -90,8 +90,10 @@ export async function getWeeklySummary(guildId, supabase, useAI = false) {
         }
       } catch (error) {
         console.error('❌ Erreur génération IA:', error);
+        console.error('   Message:', error.message);
         console.error('   Stack:', error.stack);
-        // Continue sans IA si erreur
+        // Ne pas définir aiSummary si erreur, pour que le code appelant puisse détecter l'échec
+        aiSummary = null;
       }
     } else {
       console.log('⚠️ IA non activée ou clé API manquante');

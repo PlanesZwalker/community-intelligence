@@ -41,6 +41,7 @@ export async function registerCommands(client) {
     await rest.put(route, { body: commandsData });
 
     console.log('✅ Commandes enregistrées avec succès!');
+    console.log(`   Commandes enregistrées: ${commandsData.map(c => c.name).join(', ')}`);
     return true; // Succès
   } catch (error) {
     console.error('❌ Erreur lors de l\'enregistrement des commandes:', error.message);
