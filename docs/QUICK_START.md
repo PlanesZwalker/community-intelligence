@@ -34,7 +34,7 @@ git push -u origin main
    - **Build Command** : `npm install`
    - **Start Command** : `npm start`
    - **Plan** : `Free`
-5. Ajoutez les variables d'environnement (voir `DEPLOYMENT.md`)
+5. Ajoutez les variables d'environnement (voir [DEPLOYMENT.md](DEPLOYMENT.md))
 6. **Create Web Service**
 
 ### 4. Déployer le Dashboard (Vercel)
@@ -45,7 +45,7 @@ git push -u origin main
 4. Configuration :
    - **Root Directory** : `./dashboard` ⚠️
    - **Framework** : Next.js (auto-détecté)
-5. Ajoutez les variables d'environnement (voir `DEPLOYMENT.md`)
+5. Ajoutez les variables d'environnement (voir [DEPLOYMENT.md](DEPLOYMENT.md))
 6. **Deploy**
 
 ### 5. Configurer l'authentification
@@ -58,5 +58,5 @@ Votre bot et dashboard sont maintenant en ligne ! 🎉
 
 ---
 
-Pour plus de détails, voir `DEPLOYMENT.md`
+Pour plus de détails, voir [DEPLOYMENT.md](DEPLOYMENT.md)
 

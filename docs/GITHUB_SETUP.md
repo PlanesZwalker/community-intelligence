@@ -84,5 +84,5 @@ git branch -M main
 
 ---
 
-**Une fois le repo créé, suivez `DEPLOYMENT.md` pour déployer ! 🚀**
+**Une fois le repo créé, suivez [DEPLOYMENT.md](DEPLOYMENT.md) pour déployer ! 🚀**
 

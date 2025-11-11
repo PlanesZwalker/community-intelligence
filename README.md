@@ -4,7 +4,7 @@ Bot Discord d'analyse de communauté avec IA générative - MVP gratuit pour dé
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> **🚀 Déploiement rapide** : Voir [QUICK_START.md](QUICK_START.md) pour déployer en 10 minutes !
+> **🚀 Déploiement rapide** : Voir [QUICK_START.md](docs/QUICK_START.md) pour déployer en 10 minutes !
 
 ## 🎯 Fonctionnalités
 
@@ -207,7 +207,7 @@ Une fois que vous avez des revenus, vous pouvez ajouter :
 
 ## 📜 Licence
 
-Ce projet est sous licence [MIT](LICENSE). Voir [LICENSE_INFO.md](LICENSE_INFO.md) pour plus de détails.
+Ce projet est sous licence [MIT](LICENSE). Voir [LICENSE_INFO.md](docs/LICENSE_INFO.md) pour plus de détails.
 
 ## 🤝 Support
 
