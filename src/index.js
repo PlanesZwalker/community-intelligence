@@ -104,18 +104,32 @@ client.on(Events.MessageCreate, async (message) => {
 
 // Gérer les interactions (commandes slash)
 client.on(Events.InteractionCreate, async (interaction) => {
-  // Vérifier que c'est une commande chat valide
-  if (!interaction.isChatInputCommand()) return;
+  console.log('🔔 Interaction reçue:', interaction.type, interaction.isChatInputCommand() ? `Commande: /${interaction.commandName}` : 'Autre type');
   
-  // Vérifier que l'interaction a les propriétés nécessaires
-  if (!interaction.commandName || !interaction.guild) {
-    console.warn('⚠️ Interaction incomplète reçue:', {
-      commandName: interaction.commandName,
-      hasGuild: !!interaction.guild,
-    });
+  // Vérifier que c'est une commande chat valide
+  if (!interaction.isChatInputCommand()) {
+    console.log('   ⏭️ Pas une commande chat, ignorée');
     return;
   }
   
+  // Vérifier que l'interaction a les propriétés nécessaires
+  if (!interaction.commandName) {
+    console.warn('⚠️ Interaction sans commandName reçue');
+    return;
+  }
+  
+  if (!interaction.guild) {
+    console.warn('⚠️ Commande utilisée en DM (non supporté):', interaction.commandName);
+    if (interaction.isRepliable()) {
+      return interaction.reply({
+        content: '❌ Les commandes doivent être utilisées dans un serveur Discord.',
+        ephemeral: true,
+      }).catch(err => console.error('Erreur lors de la réponse:', err));
+    }
+    return;
+  }
+  
+  console.log(`   📍 Serveur: ${interaction.guild.name} (${interaction.guild.id})`);
   await commandHandler(interaction, client);
 });
 

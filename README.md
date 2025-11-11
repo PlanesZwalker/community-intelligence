@@ -9,8 +9,9 @@ Bot Discord d'analyse de communauté avec IA générative - MVP gratuit pour dé
 ## 🎯 Fonctionnalités
 
 - ✅ **Collecte automatique des messages** - Stocke tous les messages pour analyse
-- ✅ **Statistiques en temps réel** - Commande `/stats` pour voir l'activité
-- ✅ **Résumé hebdomadaire** - Commande `/weekly-summary` pour un aperçu de la semaine
+- ✅ **Statistiques en temps réel** - Commande `/ci-stats` pour voir l'activité
+- ✅ **Résumé hebdomadaire** - Commande `/ci-weekly-summary` pour un aperçu de la semaine
+- ✅ **Résumé IA intelligent** - Commande `/ci-ai-summary` avec Groq (gratuit)
 - ✅ **Détection de questions** - Identifie les questions posées
 - ✅ **Analytics de base** - Membres actifs, canaux populaires, etc.
 
@@ -101,16 +102,24 @@ npm run dev
 - `/ci-ai-summary` - Résumé intelligent généré par IA (nécessite clé API)
 - `/ci-recommendations` - Recommandations d'engagement basées sur l'IA
 
-## 🚢 Déploiement sur Railway (gratuit)
+> **⏱️ Note importante** : Les commandes globales peuvent prendre jusqu'à **1 heure** pour apparaître dans Discord après l'enregistrement. Si les commandes n'apparaissent pas immédiatement, attendez quelques minutes ou utilisez-les directement en tapant `/ci-stats` même si elles n'apparaissent pas dans l'autocomplétion.
 
-1. Créez un compte sur https://railway.app
-2. Cliquez sur "New Project" > "Deploy from GitHub repo"
+## 🚢 Déploiement sur Render (gratuit)
+
+1. Créez un compte sur https://render.com
+2. Cliquez sur "New +" > "Web Service"
 3. Connectez votre repo GitHub
-4. Railway détectera automatiquement Node.js
-5. Ajoutez les variables d'environnement dans "Variables"
-6. Le bot se déploiera automatiquement !
+4. Configurez le service :
+   - **Name** : `community-intelligence-bot` (ou votre choix)
+   - **Environment** : `Node`
+   - **Build Command** : `npm install`
+   - **Start Command** : `node src/index.js`
+   - **Plan** : Free (gratuit)
+5. Ajoutez les variables d'environnement dans "Environment"
+6. Cliquez sur "Create Web Service"
+7. Le bot se déploiera automatiquement !
 
-### Variables à ajouter sur Railway :
+### Variables à ajouter sur Render :
 
 - `DISCORD_TOKEN`
 - `DISCORD_CLIENT_ID`
@@ -210,7 +219,7 @@ Une fois que vous avez des revenus, vous pouvez ajouter :
 ### Bot Discord
 - **Node.js** + **discord.js** - Bot Discord
 - **Supabase** - Base de données PostgreSQL gratuite
-- **Railway/Render** - Hosting gratuit
+- **Render** - Hosting gratuit (recommandé)
 - **Groq API** - IA générative gratuite (recommandé)
 - **Alternatives** : OpenAI, Anthropic Claude, Hugging Face
 
