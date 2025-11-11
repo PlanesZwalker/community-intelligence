@@ -25,14 +25,47 @@ const client = new Client({
   ],
 });
 
-// Initialiser Supabase
-const supabaseUrl = process.env.SUPABASE_URL?.trim();
-const supabaseKey = process.env.SUPABASE_KEY?.trim();
+// Initialiser Supabase avec validation stricte
+const supabaseUrlRaw = process.env.SUPABASE_URL;
+const supabaseKeyRaw = process.env.SUPABASE_KEY;
 
-if (!supabaseUrl || !supabaseKey) {
-  console.error('❌ Erreur: SUPABASE_URL ou SUPABASE_KEY manquants');
-  console.error('   SUPABASE_URL:', supabaseUrl || 'NON DÉFINI');
-  console.error('   SUPABASE_KEY:', supabaseKey ? `${supabaseKey.substring(0, 20)}...` : 'NON DÉFINI');
+// Logs de débogage pour Render
+console.log('🔍 Debug - Variables d\'environnement:');
+console.log('   SUPABASE_URL existe:', !!supabaseUrlRaw);
+console.log('   SUPABASE_URL longueur:', supabaseUrlRaw?.length || 0);
+console.log('   SUPABASE_URL (premiers 50 chars):', supabaseUrlRaw?.substring(0, 50) || 'NON DÉFINI');
+console.log('   SUPABASE_KEY existe:', !!supabaseKeyRaw);
+console.log('   SUPABASE_KEY longueur:', supabaseKeyRaw?.length || 0);
+
+const supabaseUrl = supabaseUrlRaw?.trim();
+const supabaseKey = supabaseKeyRaw?.trim();
+
+if (!supabaseUrl || supabaseUrl === '') {
+  console.error('❌ Erreur: SUPABASE_URL manquante ou vide');
+  console.error('   Valeur brute:', supabaseUrlRaw || 'NON DÉFINI');
+  console.error('   Valeur après trim:', supabaseUrl || 'VIDE');
+  process.exit(1);
+}
+
+if (!supabaseKey || supabaseKey === '') {
+  console.error('❌ Erreur: SUPABASE_KEY manquante ou vide');
+  console.error('   Valeur brute existe:', !!supabaseKeyRaw);
+  process.exit(1);
+}
+
+// Valider que SUPABASE_URL est une URL valide
+try {
+  const url = new URL(supabaseUrl);
+  if (!url.protocol.startsWith('http')) {
+    console.error('❌ Erreur: SUPABASE_URL doit commencer par http:// ou https://');
+    console.error('   Valeur reçue:', supabaseUrl);
+    process.exit(1);
+  }
+  console.log('✅ SUPABASE_URL validée:', url.origin);
+} catch (error) {
+  console.error('❌ Erreur: SUPABASE_URL n\'est pas une URL valide');
+  console.error('   Valeur reçue:', supabaseUrl);
+  console.error('   Erreur:', error.message);
   process.exit(1);
 }
 
