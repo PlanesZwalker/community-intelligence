@@ -1,0 +1,8 @@
+# Fichiers à ignorer lors du déploiement Vercel
+node_modules
+.env.local
+.env*.local
+.next
+.vercel
+*.log
+
