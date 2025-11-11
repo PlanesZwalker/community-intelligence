@@ -46,10 +46,19 @@ npm install
 
 1. Créez un compte sur https://supabase.com (gratuit)
 2. Créez un nouveau projet
-3. Allez dans "SQL Editor"
-4. Exécutez le script `supabase/schema.sql` pour créer les tables
-5. Allez dans "Settings" > "API"
-6. Copiez l'**URL du projet** et la **clé anon public**
+3. **⚠️ IMPORTANT** : Créez les tables de base de données :
+   - Allez dans "SQL Editor"
+   - Cliquez sur "New query"
+   - Copiez-collez le contenu du fichier `supabase/schema.sql`
+   - Cliquez sur "Run" (ou `Ctrl+Enter`)
+   - Vérifiez que les 3 tables apparaissent dans "Table Editor" :
+     - ✅ `messages`
+     - ✅ `guild_stats`
+     - ✅ `guild_config`
+4. Allez dans "Settings" > "API"
+5. Copiez l'**URL du projet** et la **clé anon public**
+
+📖 **Guide détaillé** : Voir la section [Création des tables Supabase](#création-des-tables-supabase) dans `docs/GUIDE_COMPLET.md`
 
 ### 4. Variables d'environnement
 
