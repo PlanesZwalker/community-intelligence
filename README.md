@@ -63,7 +63,15 @@ SUPABASE_KEY=votre_cle_supabase
 NODE_ENV=production
 ```
 
-Pour trouver le `DISCORD_CLIENT_ID` : Discord Developer Portal > Votre application > "General Information" > "Application ID"
+**Où trouver ces valeurs :**
+- **DISCORD_TOKEN** : Discord Developer Portal > Bot > Token
+- **DISCORD_CLIENT_ID** : Discord Developer Portal > General Information > Application ID
+- **SUPABASE_URL** : Supabase > Settings > API > Project URL
+- **SUPABASE_KEY** : Supabase > Settings > API > anon public key
+
+📖 **Guide complet** : Voir la documentation dans `docs/` (local uniquement)
+
+💡 **Votre projet Supabase** : https://supabase.com/dashboard/project/twpznfiyatzuwkyfgudh
 
 ### 5. Lancer le bot
 

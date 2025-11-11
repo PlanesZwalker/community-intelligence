@@ -53,7 +53,7 @@ export default function Dashboard() {
         .limit(1000)
 
       if (data) {
-        const uniqueGuilds = [...new Set(data.map(m => m.guild_id))]
+        const uniqueGuilds = Array.from(new Set(data.map(m => m.guild_id)))
         setGuilds(uniqueGuilds.map(id => ({ id, name: `Serveur ${id.slice(0, 8)}` })))
         if (uniqueGuilds.length > 0) {
           setSelectedGuild(uniqueGuilds[0])

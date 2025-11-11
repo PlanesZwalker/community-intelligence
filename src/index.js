@@ -80,9 +80,11 @@ client.once(Events.ClientReady, async (readyClient) => {
   console.log(`✅ Bot connecté en tant que ${readyClient.user.tag}`);
   
   // Enregistrer les commandes slash
-  await registerCommands(client);
+  const commandsRegistered = await registerCommands(client);
   
-  console.log('✅ Commandes enregistrées');
+  if (commandsRegistered) {
+    console.log('✅ Commandes enregistrées');
+  }
   
   // Afficher les fonctionnalités disponibles
   if (process.env.GROQ_API_KEY) {
