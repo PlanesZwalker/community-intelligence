@@ -6,8 +6,10 @@ services:
     name: community-intelligence-bot
     env: node
     plan: free  # Gratuit au début, upgrade si nécessaire
+    nodeVersion: 20  # Node.js 20 requis pour Supabase
     buildCommand: npm install
     startCommand: npm start
+    packageManager: npm  # Forcer npm au lieu de yarn
     envVars:
       - key: NODE_ENV
         value: production
