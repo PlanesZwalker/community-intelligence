@@ -66,7 +66,8 @@ export async function getWeeklySummary(guildId, supabase, useAI = false) {
     let aiSummary = null;
     if (useAI && process.env.GROQ_API_KEY) {
       try {
-        const { data: recentMessages } = await supabase
+        console.log('🤖 Tentative de génération de résumé IA...');
+        const { data: recentMessages, error: queryError } = await supabase
           .from('messages')
           .select('content, author_display_name')
           .eq('guild_id', guildId)
@@ -74,13 +75,27 @@ export async function getWeeklySummary(guildId, supabase, useAI = false) {
           .order('created_at', { ascending: false })
           .limit(100);
 
-        if (recentMessages && recentMessages.length > 0) {
-          aiSummary = await generateSummary(recentMessages, process.env.AI_PROVIDER || 'groq');
+        if (queryError) {
+          console.error('❌ Erreur lors de la récupération des messages:', queryError);
+        } else {
+          console.log(`📊 Messages récupérés pour IA: ${recentMessages?.length || 0}`);
+          
+          if (recentMessages && recentMessages.length > 0) {
+            console.log('🤖 Appel à generateSummary...');
+            aiSummary = await generateSummary(recentMessages, process.env.AI_PROVIDER || 'groq');
+            console.log(`✅ Résumé IA généré (longueur: ${aiSummary?.length || 0} caractères)`);
+          } else {
+            console.log('⚠️ Aucun message récent trouvé pour générer le résumé IA');
+          }
         }
       } catch (error) {
-        console.error('Erreur génération IA:', error);
+        console.error('❌ Erreur génération IA:', error);
+        console.error('   Stack:', error.stack);
         // Continue sans IA si erreur
       }
+    } else {
+      console.log('⚠️ IA non activée ou clé API manquante');
+      console.log(`   useAI: ${useAI}, GROQ_API_KEY: ${!!process.env.GROQ_API_KEY}`);
     }
 
     return {

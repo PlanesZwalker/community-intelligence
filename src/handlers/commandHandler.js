@@ -13,10 +13,14 @@ export async function commandHandler(interaction, client) {
     return;
   }
 
+  console.log(`📝 Commande reçue: /${interaction.commandName}`);
+  console.log(`   Commandes disponibles: ${Array.from(client.commands.keys()).join(', ')}`);
+
   const command = client.commands.get(interaction.commandName);
 
   if (!command) {
     console.warn(`⚠️ Commande non trouvée: ${interaction.commandName}`);
+    console.warn(`   Commandes enregistrées: ${Array.from(client.commands.keys()).join(', ')}`);
     if (interaction.isRepliable()) {
       return interaction.reply({
         content: '❌ Commande non trouvée',
@@ -26,8 +30,11 @@ export async function commandHandler(interaction, client) {
     return;
   }
 
+  console.log(`✅ Commande trouvée, exécution...`);
+
   try {
     await command.execute(interaction, client);
+    console.log(`✅ Commande /${interaction.commandName} exécutée avec succès`);
   } catch (error) {
     console.error(`❌ Erreur lors de l'exécution de ${interaction.commandName}:`, error);
     
@@ -119,19 +126,24 @@ export const commands = [
     name: 'ci-ai-summary',
     description: 'Génère un résumé intelligent avec IA (nécessite clé API)',
     execute: async (interaction, client) => {
+      console.log('🤖 Commande /ci-ai-summary exécutée');
       await interaction.deferReply();
 
       if (!process.env.GROQ_API_KEY && !process.env.OPENAI_API_KEY && !process.env.ANTHROPIC_API_KEY) {
+        console.log('❌ Aucune clé API IA configurée');
         return interaction.editReply({
           content: '❌ Aucune clé API IA configurée. Ajoutez `GROQ_API_KEY` dans vos variables d\'environnement.\n💡 Groq est gratuit : https://console.groq.com',
         });
       }
 
+      console.log('📊 Génération du résumé IA...');
       const summary = await getWeeklySummary(interaction.guild.id, client.supabase, true);
+      console.log('📊 Résumé généré, aiSummary:', !!summary.aiSummary);
 
       if (!summary.aiSummary) {
+        console.log('❌ Aucun résumé IA généré');
         return interaction.editReply({
-          content: '❌ Impossible de générer le résumé IA. Vérifiez votre configuration.',
+          content: '❌ Impossible de générer le résumé IA. Vérifiez votre configuration ou attendez qu\'il y ait plus de messages dans le serveur.',
         });
       }
 
