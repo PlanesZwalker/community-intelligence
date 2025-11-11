@@ -67,11 +67,12 @@ export async function getWeeklySummary(guildId, supabase, useAI = false) {
     if (useAI && process.env.GROQ_API_KEY) {
       try {
         console.log('🤖 Tentative de génération de résumé IA...');
+        // Pour l'IA, récupérer TOUS les messages disponibles (pas seulement les 7 derniers jours)
+        // Cela permet d'analyser l'historique synchronisé même s'il est plus ancien
         const { data: recentMessages, error: queryError } = await supabase
           .from('messages')
           .select('content, author_display_name')
           .eq('guild_id', guildId)
-          .gte('created_at', sevenDaysAgo.toISOString())
           .order('created_at', { ascending: false })
           .limit(100);
 
