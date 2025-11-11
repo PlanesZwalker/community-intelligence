@@ -1,0 +1,27 @@
+# Configuration Render.com pour le bot Discord
+# Documentation: https://render.com/docs/yaml-spec
+
+services:
+  - type: web
+    name: community-intelligence-bot
+    env: node
+    plan: free  # Gratuit au début, upgrade si nécessaire
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DISCORD_TOKEN
+        sync: false  # À définir manuellement dans le dashboard Render
+      - key: DISCORD_CLIENT_ID
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_KEY
+        sync: false
+      - key: AI_PROVIDER
+        value: groq
+      - key: GROQ_API_KEY
+        sync: false
+    healthCheckPath: /health  # Optionnel, à créer si nécessaire
+
