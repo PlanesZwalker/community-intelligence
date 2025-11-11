@@ -26,10 +26,17 @@ const client = new Client({
 });
 
 // Initialiser Supabase
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_KEY
-);
+const supabaseUrl = process.env.SUPABASE_URL?.trim();
+const supabaseKey = process.env.SUPABASE_KEY?.trim();
+
+if (!supabaseUrl || !supabaseKey) {
+  console.error('❌ Erreur: SUPABASE_URL ou SUPABASE_KEY manquants');
+  console.error('   SUPABASE_URL:', supabaseUrl || 'NON DÉFINI');
+  console.error('   SUPABASE_KEY:', supabaseKey ? `${supabaseKey.substring(0, 20)}...` : 'NON DÉFINI');
+  process.exit(1);
+}
+
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Stocker Supabase dans le client pour y accéder partout
 client.supabase = supabase;
