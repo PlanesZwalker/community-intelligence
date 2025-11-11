@@ -101,8 +101,26 @@ npm run dev
 - `/ci-weekly-summary` - Génère un résumé hebdomadaire (avec IA si configurée)
 - `/ci-ai-summary` - Résumé intelligent généré par IA (nécessite clé API)
 - `/ci-recommendations` - Recommandations d'engagement basées sur l'IA
+- `/ci-sync-history` - Synchronise l'historique des messages depuis Discord vers la base de données
 
 > **⏱️ Note importante** : Les commandes globales peuvent prendre jusqu'à **1 heure** pour apparaître dans Discord après l'enregistrement. Si les commandes n'apparaissent pas immédiatement, attendez quelques minutes ou utilisez-les directement en tapant `/ci-stats` même si elles n'apparaissent pas dans l'autocomplétion.
+
+### 🔄 Synchronisation de l'historique
+
+Par défaut, le bot collecte uniquement les **nouveaux messages** envoyés après son activation. Pour récupérer l'historique des messages passés :
+
+1. **Manuellement** : Utilisez la commande `/ci-sync-history` dans Discord
+   - Récupère jusqu'à 100 messages par canal
+   - Traite jusqu'à 50 canaux par serveur
+   - Peut prendre plusieurs minutes selon le nombre de canaux
+
+2. **Automatiquement au démarrage** : Ajoutez dans vos variables d'environnement :
+   ```env
+   SYNC_HISTORY_ON_START=true
+   ```
+   ⚠️ **Attention** : Cela peut ralentir le démarrage du bot si vous avez beaucoup de canaux.
+
+> **💡 Note** : La synchronisation vérifie automatiquement les doublons, vous pouvez l'exécuter plusieurs fois sans risque.
 
 ## 🚢 Déploiement sur Render (gratuit)
 
@@ -128,6 +146,7 @@ npm run dev
 - `NODE_ENV=production`
 - `AI_PROVIDER=groq` (optionnel)
 - `GROQ_API_KEY` (optionnel - gratuit sur https://console.groq.com)
+- `SYNC_HISTORY_ON_START=true` (optionnel - synchronise l'historique au démarrage)
 
 ## 🤖 Intégration IA (Optionnel - GRATUIT avec Groq !)
 
@@ -238,7 +257,8 @@ Une fois que vous avez des revenus, vous pouvez ajouter :
 
 ## 📝 Notes
 
-- Le bot collecte uniquement les messages **après** son activation
+- Par défaut, le bot collecte uniquement les messages **après** son activation
+- Utilisez `/ci-sync-history` pour récupérer l'historique des messages passés
 - Les données sont stockées de manière sécurisée sur Supabase
 - Conforme aux règles de Discord (Message Content Intent requis)
 

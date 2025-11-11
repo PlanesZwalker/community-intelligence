@@ -6,6 +6,7 @@ import { messageHandler } from './handlers/messageHandler.js';
 import { commandHandler } from './handlers/commandHandler.js';
 import { registerCommands } from './utils/registerCommands.js';
 import { checkConfig } from './utils/checkConfig.js';
+import { syncHistory } from './utils/syncHistory.js';
 
 // Charger les variables d'environnement
 config();
@@ -92,6 +93,22 @@ client.once(Events.ClientReady, async (readyClient) => {
   }
   
   console.log('✅ Bot prêt à analyser votre communauté!');
+  
+  // Synchroniser l'historique au démarrage (optionnel, peut être désactivé)
+  // Note: Cela peut prendre du temps selon le nombre de serveurs/canaux
+  if (process.env.SYNC_HISTORY_ON_START === 'true') {
+    console.log('🔄 Synchronisation de l\'historique au démarrage activée...');
+    // Lancer la synchronisation en arrière-plan (ne pas bloquer le bot)
+    syncHistory(readyClient, supabase, {
+      limit: 100, // 100 messages par canal
+      maxChannels: 50, // Maximum 50 canaux par serveur
+      delayBetweenChannels: 1000, // 1 seconde entre chaque canal
+    }).catch(error => {
+      console.error('❌ Erreur lors de la synchronisation automatique:', error);
+    });
+  } else {
+    console.log('💡 Astuce: Utilisez /ci-sync-history pour synchroniser l\'historique manuellement');
+  }
 });
 
 // Gérer les messages

@@ -2,6 +2,7 @@ import { EmbedBuilder } from 'discord.js';
 import { getStats } from '../utils/analytics.js';
 import { getWeeklySummary } from '../utils/weeklySummary.js';
 import { generateEngagementRecommendations } from '../utils/aiService.js';
+import { syncHistory } from '../utils/syncHistory.js';
 
 /**
  * Gère les commandes slash
@@ -186,6 +187,47 @@ export const commands = [
         .setFooter({ text: 'Community Intelligence Bot - Powered by AI' });
 
       await interaction.editReply({ embeds: [embed] });
+    },
+  },
+  {
+    name: 'ci-sync-history',
+    description: 'Synchronise l\'historique des messages depuis Discord vers la base de données',
+    execute: async (interaction, client) => {
+      await interaction.deferReply({ ephemeral: true });
+
+      try {
+        await interaction.editReply({
+          content: '🔄 Synchronisation de l\'historique en cours... Cela peut prendre plusieurs minutes.',
+        });
+
+        const stats = await syncHistory(client, client.supabase, {
+          limit: 100, // 100 messages par canal
+          maxChannels: 50, // Maximum 50 canaux par serveur
+          delayBetweenChannels: 1000, // 1 seconde entre chaque canal
+        });
+
+        const embed = new EmbedBuilder()
+          .setTitle('✅ Synchronisation terminée')
+          .setColor(0x57F287)
+          .addFields(
+            { name: '📊 Serveurs traités', value: stats.guilds.toString(), inline: true },
+            { name: '📝 Canaux traités', value: stats.channels.toString(), inline: true },
+            { name: '💬 Messages insérés', value: stats.messages.toString(), inline: true },
+            { name: '❌ Erreurs', value: stats.errors.toString(), inline: true }
+          )
+          .setTimestamp()
+          .setFooter({ text: 'Community Intelligence Bot' });
+
+        await interaction.editReply({
+          content: null,
+          embeds: [embed],
+        });
+      } catch (error) {
+        console.error('Erreur lors de la synchronisation:', error);
+        await interaction.editReply({
+          content: `❌ Erreur lors de la synchronisation: ${error.message}`,
+        });
+      }
     },
   },
 ];
