@@ -67,6 +67,20 @@ export async function getWeeklySummary(guildId, supabase, useAI = false) {
     if (useAI && process.env.GROQ_API_KEY) {
       try {
         console.log('🤖 Tentative de génération de résumé IA...');
+        console.log(`   Guild ID: ${guildId}`);
+        
+        // Vérifier d'abord s'il y a des messages dans la base pour ce serveur
+        const { count: totalCount, error: countError } = await supabase
+          .from('messages')
+          .select('*', { count: 'exact', head: true })
+          .eq('guild_id', guildId);
+        
+        console.log(`   📊 Total de messages dans la base pour ce serveur: ${totalCount || 0}`);
+        
+        if (countError) {
+          console.error('❌ Erreur lors du comptage des messages:', countError);
+        }
+        
         // Pour l'IA, récupérer TOUS les messages disponibles (pas seulement les 7 derniers jours)
         // Cela permet d'analyser l'historique synchronisé même s'il est plus ancien
         const { data: recentMessages, error: queryError } = await supabase
@@ -78,15 +92,34 @@ export async function getWeeklySummary(guildId, supabase, useAI = false) {
 
         if (queryError) {
           console.error('❌ Erreur lors de la récupération des messages:', queryError);
+          console.error('   Code:', queryError.code);
+          console.error('   Message:', queryError.message);
+          console.error('   Details:', queryError.details);
         } else {
           console.log(`📊 Messages récupérés pour IA: ${recentMessages?.length || 0}`);
           
           if (recentMessages && recentMessages.length > 0) {
+            console.log(`   Premier message: ${recentMessages[0]?.content?.substring(0, 50) || 'N/A'}...`);
             console.log('🤖 Appel à generateSummary...');
             aiSummary = await generateSummary(recentMessages, process.env.AI_PROVIDER || 'groq');
             console.log(`✅ Résumé IA généré (longueur: ${aiSummary?.length || 0} caractères)`);
           } else {
             console.log('⚠️ Aucun message récent trouvé pour générer le résumé IA');
+            console.log(`   Vérifiez que les messages ont bien été synchronisés avec /ci-sync-history`);
+            console.log(`   Guild ID utilisé: ${guildId}`);
+            
+            // Vérifier les guild_ids disponibles dans la base
+            const { data: allGuilds } = await supabase
+              .from('messages')
+              .select('guild_id')
+              .limit(10);
+            
+            if (allGuilds && allGuilds.length > 0) {
+              const uniqueGuilds = [...new Set(allGuilds.map(m => m.guild_id))];
+              console.log(`   Guild IDs trouvés dans la base: ${uniqueGuilds.join(', ')}`);
+            } else {
+              console.log('   ⚠️ Aucun message trouvé dans la base de données pour aucun serveur');
+            }
           }
         }
       } catch (error) {
