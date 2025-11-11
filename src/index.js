@@ -42,6 +42,12 @@ client.once(Events.ClientReady, async (readyClient) => {
   await registerCommands(client);
   
   console.log('✅ Commandes enregistrées');
+  
+  // Afficher les fonctionnalités disponibles
+  if (process.env.GROQ_API_KEY) {
+    console.log('🤖 IA Groq activée - Commandes IA disponibles: /ai-summary, /recommendations');
+  }
+  
   console.log('✅ Bot prêt à analyser votre communauté!');
 });
 
