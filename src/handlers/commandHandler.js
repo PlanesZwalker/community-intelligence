@@ -7,29 +7,49 @@ import { generateEngagementRecommendations } from '../utils/aiService.js';
  * Gère les commandes slash
  */
 export async function commandHandler(interaction, client) {
+  // Vérifier que c'est bien une interaction valide
+  if (!interaction || typeof interaction.commandName !== 'string') {
+    console.error('❌ Interaction invalide reçue:', interaction);
+    return;
+  }
+
   const command = client.commands.get(interaction.commandName);
 
   if (!command) {
-    return interaction.reply({
-      content: '❌ Commande non trouvée',
-      ephemeral: true,
-    });
+    console.warn(`⚠️ Commande non trouvée: ${interaction.commandName}`);
+    if (interaction.isRepliable()) {
+      return interaction.reply({
+        content: '❌ Commande non trouvée',
+        ephemeral: true,
+      }).catch(err => console.error('Erreur lors de la réponse:', err));
+    }
+    return;
   }
 
   try {
     await command.execute(interaction, client);
   } catch (error) {
-    console.error(`Erreur lors de l'exécution de ${interaction.commandName}:`, error);
+    console.error(`❌ Erreur lors de l'exécution de ${interaction.commandName}:`, error);
     
+    // Vérifier que l'interaction peut encore répondre
+    if (!interaction.isRepliable()) {
+      console.error('❌ Interaction ne peut plus répondre');
+      return;
+    }
+
     const errorMessage = {
       content: '❌ Une erreur est survenue lors de l\'exécution de cette commande.',
       ephemeral: true,
     };
 
-    if (interaction.replied || interaction.deferred) {
-      await interaction.followUp(errorMessage);
-    } else {
-      await interaction.reply(errorMessage);
+    try {
+      if (interaction.replied || interaction.deferred) {
+        await interaction.followUp(errorMessage);
+      } else {
+        await interaction.reply(errorMessage);
+      }
+    } catch (replyError) {
+      console.error('❌ Impossible d\'envoyer le message d\'erreur:', replyError);
     }
   }
 }

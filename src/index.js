@@ -61,7 +61,17 @@ client.on(Events.MessageCreate, async (message) => {
 
 // Gérer les interactions (commandes slash)
 client.on(Events.InteractionCreate, async (interaction) => {
+  // Vérifier que c'est une commande chat valide
   if (!interaction.isChatInputCommand()) return;
+  
+  // Vérifier que l'interaction a les propriétés nécessaires
+  if (!interaction.commandName || !interaction.guild) {
+    console.warn('⚠️ Interaction incomplète reçue:', {
+      commandName: interaction.commandName,
+      hasGuild: !!interaction.guild,
+    });
+    return;
+  }
   
   await commandHandler(interaction, client);
 });
