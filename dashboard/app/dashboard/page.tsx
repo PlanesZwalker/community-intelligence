@@ -185,9 +185,45 @@ export default function Dashboard() {
         )}
 
         {!selectedGuild ? (
-          <div className="text-center py-12">
+          <div className="text-center py-12 max-w-2xl mx-auto">
             <AlertCircle className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-            <p className="text-gray-400">Aucun serveur disponible. Le bot doit être actif sur au moins un serveur.</p>
+            <h2 className="text-xl font-semibold text-white mb-2">Aucun serveur disponible</h2>
+            <p className="text-gray-400 mb-6">
+              Le bot doit être actif sur au moins un serveur Discord et avoir collecté des messages pour que les statistiques apparaissent.
+            </p>
+            
+            <div className="bg-discord-dark-but-not-black rounded-lg p-6 text-left space-y-4">
+              <div>
+                <h3 className="text-white font-semibold mb-2">📋 Étapes pour inviter le bot :</h3>
+                <ol className="list-decimal list-inside space-y-2 text-gray-300 text-sm">
+                  <li>Allez sur <a href="https://discord.com/developers/applications" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Discord Developer Portal</a></li>
+                  <li>Sélectionnez votre application <strong>Community Intelligence</strong></li>
+                  <li>Allez dans <strong>OAuth2</strong> → <strong>URL Generator</strong></li>
+                  <li>Sélectionnez les scopes : <code className="bg-gray-800 px-1 rounded">bot</code> et <code className="bg-gray-800 px-1 rounded">applications.commands</code></li>
+                  <li>Sélectionnez les permissions : <code className="bg-gray-800 px-1 rounded">Read Messages</code>, <code className="bg-gray-800 px-1 rounded">Send Messages</code>, <code className="bg-gray-800 px-1 rounded">Read Message History</code></li>
+                  <li>Copiez l'URL générée en bas de la page</li>
+                  <li>Ouvrez l'URL dans votre navigateur et sélectionnez un serveur Discord</li>
+                  <li>Autorisez le bot à rejoindre votre serveur</li>
+                </ol>
+              </div>
+              
+              <div className="pt-4 border-t border-gray-700">
+                <h3 className="text-white font-semibold mb-2">✅ Vérifications :</h3>
+                <ul className="list-disc list-inside space-y-1 text-gray-300 text-sm">
+                  <li>Le bot est-il en ligne sur Render ? Vérifiez les logs : <a href="https://dashboard.render.com" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Render Dashboard</a></li>
+                  <li>Le bot est-il présent sur votre serveur Discord ? (visible dans la liste des membres)</li>
+                  <li>Y a-t-il eu des messages envoyés sur le serveur depuis l'invitation du bot ?</li>
+                  <li>Les messages apparaissent-ils dans Supabase ? Vérifiez : <a href="https://supabase.com/dashboard/project/twpznfiyatzuwkyfgudh/editor" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Table Editor</a></li>
+                </ul>
+              </div>
+              
+              <div className="pt-4 border-t border-gray-700">
+                <p className="text-xs text-gray-500">
+                  💡 <strong>Note</strong> : Le bot collecte uniquement les messages envoyés <strong>après</strong> son activation. 
+                  Envoyez quelques messages sur votre serveur, puis rafraîchissez cette page.
+                </p>
+              </div>
+            </div>
           </div>
         ) : (
           <>
