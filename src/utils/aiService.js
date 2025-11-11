@@ -57,12 +57,13 @@ async function generateWithGroq(prompt) {
     throw new Error('GROQ_API_KEY non configurée');
   }
 
-  // Liste de modèles à essayer (du plus récent au plus ancien)
+  // Liste de modèles de production disponibles (selon https://console.groq.com/docs/models)
+  // Ordre : du plus puissant au plus rapide
   const models = [
-    'llama-3.3-70b-versatile',
-    'llama-3.1-70b-versatile',
-    'llama-3.1-8b-instant',
-    'mixtral-8x7b-32768',
+    'llama-3.3-70b-versatile',      // Production: 280 t/s, meilleure qualité
+    'llama-3.1-8b-instant',          // Production: 560 t/s, plus rapide
+    'openai/gpt-oss-120b',           // Production: 500 t/s, alternative
+    'openai/gpt-oss-20b',            // Production: 1000 t/s, très rapide
   ];
 
   const messages = [

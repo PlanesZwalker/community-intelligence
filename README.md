@@ -137,7 +137,12 @@ Le bot supporte plusieurs providers d'IA pour des fonctionnalités avancées :
 
 - **Gratuit** : 14,400 requêtes/jour
 - **Très rapide** : Réponses en millisecondes
-- **Modèles** : Llama 3.1, Mixtral (open-source)
+- **Modèles de production** : 
+  - `llama-3.3-70b-versatile` (280 t/s - meilleure qualité)
+  - `llama-3.1-8b-instant` (560 t/s - plus rapide)
+  - `openai/gpt-oss-120b` (500 t/s)
+  - `openai/gpt-oss-20b` (1000 t/s - très rapide)
+- **Documentation** : https://console.groq.com/docs/models
 - **Inscription** : https://console.groq.com
 
 **⚠️ Important** : Si un lien d'authentification ne fonctionne pas, allez directement sur https://console.groq.com et créez un compte normalement.
