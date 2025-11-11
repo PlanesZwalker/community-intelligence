@@ -2,6 +2,10 @@
 
 Bot Discord d'analyse de communauté avec IA générative - MVP gratuit pour démarrer sans budget.
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+> **🚀 Déploiement rapide** : Voir [QUICK_START.md](QUICK_START.md) pour déployer en 10 minutes !
+
 ## 🎯 Fonctionnalités
 
 - ✅ **Collecte automatique des messages** - Stocke tous les messages pour analyse
@@ -200,6 +204,10 @@ Une fois que vous avez des revenus, vous pouvez ajouter :
 - Le bot collecte uniquement les messages **après** son activation
 - Les données sont stockées de manière sécurisée sur Supabase
 - Conforme aux règles de Discord (Message Content Intent requis)
+
+## 📜 Licence
+
+Ce projet est sous licence [MIT](LICENSE). Voir [LICENSE_INFO.md](LICENSE_INFO.md) pour plus de détails.
 
 ## 🤝 Support
 
