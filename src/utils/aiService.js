@@ -57,36 +57,69 @@ async function generateWithGroq(prompt) {
     throw new Error('GROQ_API_KEY non configurée');
   }
 
-  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'llama-3.1-70b-versatile', // ou 'mixtral-8x7b-32768'
-      messages: [
-        {
-          role: 'system',
-          content: 'Tu es un expert en analyse de communautés Discord. Génère des résumés clairs et actionnables.',
-        },
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
-      temperature: 0.7,
-      max_tokens: 1000,
-    }),
-  });
+  // Liste de modèles à essayer (du plus récent au plus ancien)
+  const models = [
+    'llama-3.3-70b-versatile',
+    'llama-3.1-70b-versatile',
+    'llama-3.1-8b-instant',
+    'mixtral-8x7b-32768',
+  ];
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`Groq API error: ${error}`);
+  const messages = [
+    {
+      role: 'system',
+      content: 'Tu es un expert en analyse de communautés Discord. Génère des résumés clairs et actionnables.',
+    },
+    {
+      role: 'user',
+      content: prompt,
+    },
+  ];
+
+  // Essayer chaque modèle jusqu'à ce qu'un fonctionne
+  for (const model of models) {
+    try {
+      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model,
+          messages,
+          temperature: 0.7,
+          max_tokens: 1000,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        // Si le modèle est décommissionné, essayer le suivant
+        if (errorText.includes('decommissioned') || errorText.includes('no longer supported')) {
+          console.warn(`⚠️ Modèle ${model} décommissionné, essai du modèle suivant...`);
+          continue;
+        }
+        throw new Error(`Groq API error: ${errorText}`);
+      }
+
+      const data = await response.json();
+      const content = data.choices[0]?.message?.content || 'Aucune réponse générée';
+      if (model !== models[0]) {
+        console.log(`✅ Utilisation du modèle ${model} (fallback)`);
+      }
+      return content;
+    } catch (error) {
+      // Si c'est la dernière tentative, propager l'erreur
+      if (model === models[models.length - 1]) {
+        throw error;
+      }
+      // Sinon, continuer avec le modèle suivant
+      console.warn(`⚠️ Erreur avec le modèle ${model}, essai du suivant...`);
+    }
   }
 
-  const data = await response.json();
-  return data.choices[0]?.message?.content || 'Aucune réponse générée';
+  throw new Error('Tous les modèles Groq ont échoué');
 }
 
 /**
