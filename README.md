@@ -135,13 +135,13 @@ Le bot supporte plusieurs providers d'IA pour des fonctionnalités avancées :
 
 ### Groq (GRATUIT - Recommandé) ⭐
 
-- **Gratuit** : 14,400 requêtes/jour
+- **Gratuit** : 14,400 requêtes/jour (plan gratuit)
 - **Très rapide** : Réponses en millisecondes
-- **Modèles de production** : 
-  - `llama-3.3-70b-versatile` (280 t/s - meilleure qualité)
-  - `llama-3.1-8b-instant` (560 t/s - plus rapide)
-  - `openai/gpt-oss-120b` (500 t/s)
+- **Modèles GRATUITS utilisés** (plan gratuit uniquement) : 
+  - `llama-3.1-8b-instant` (560 t/s - le moins cher, recommandé)
   - `openai/gpt-oss-20b` (1000 t/s - très rapide)
+  - `llama-3.3-70b-versatile` (280 t/s - meilleure qualité si quota disponible)
+- **⚠️ Important** : Tous ces modèles sont gratuits dans le plan gratuit de Groq
 - **Documentation** : https://console.groq.com/docs/models
 - **Inscription** : https://console.groq.com
 

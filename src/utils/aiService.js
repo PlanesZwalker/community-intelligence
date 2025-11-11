@@ -57,13 +57,13 @@ async function generateWithGroq(prompt) {
     throw new Error('GROQ_API_KEY non configurée');
   }
 
-  // Liste de modèles de production disponibles (selon https://console.groq.com/docs/models)
-  // Ordre : du plus puissant au plus rapide
+  // Liste de modèles GRATUITS (plan gratuit Groq - 14,400 req/jour)
+  // Ordre : du moins cher au plus cher (pour rester dans le gratuit)
+  // Tous ces modèles sont disponibles dans le plan gratuit avec quotas
   const models = [
-    'llama-3.3-70b-versatile',      // Production: 280 t/s, meilleure qualité
-    'llama-3.1-8b-instant',          // Production: 560 t/s, plus rapide
-    'openai/gpt-oss-120b',           // Production: 500 t/s, alternative
-    'openai/gpt-oss-20b',            // Production: 1000 t/s, très rapide
+    'llama-3.1-8b-instant',          // GRATUIT: 560 t/s, $0.05/$0.08 par 1M tokens (le moins cher)
+    'openai/gpt-oss-20b',            // GRATUIT: 1000 t/s, $0.075/$0.30 par 1M tokens
+    'llama-3.3-70b-versatile',       // GRATUIT: 280 t/s, $0.59/$0.79 par 1M tokens (meilleure qualité)
   ];
 
   const messages = [
