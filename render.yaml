@@ -25,5 +25,5 @@ services:
         value: groq
       - key: GROQ_API_KEY
         sync: false
-    healthCheckPath: /health  # Optionnel, à créer si nécessaire
+    healthCheckPath: /health  # Health check pour Render
 
