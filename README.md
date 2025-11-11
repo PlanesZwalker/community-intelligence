@@ -114,13 +114,20 @@ Le bot supporte plusieurs providers d'IA pour des fonctionnalités avancées :
 - **Modèles** : Llama 3.1, Mixtral (open-source)
 - **Inscription** : https://console.groq.com
 
-1. Créez un compte Groq
-2. Générez une clé API
-3. Ajoutez dans `.env` :
+**⚠️ Important** : Si un lien d'authentification ne fonctionne pas, allez directement sur https://console.groq.com et créez un compte normalement.
+
+1. Allez sur https://console.groq.com
+2. Cliquez sur **"Sign Up"** (gratuit)
+3. Connectez-vous avec Google, GitHub ou Email
+4. Allez dans **"API Keys"** et créez une clé
+5. Ajoutez dans `.env` :
    ```env
    AI_PROVIDER=groq
    GROQ_API_KEY=votre_cle_groq
    ```
+
+📖 **Guide complet** : Voir [docs/GROQ_SETUP.md](docs/GROQ_SETUP.md)  
+🔧 **Problèmes ?** : Voir [docs/GROQ_TROUBLESHOOTING.md](docs/GROQ_TROUBLESHOOTING.md)
 
 ### Autres options
 

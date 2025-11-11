@@ -49,3 +49,6 @@ next-env.d.ts
 # Misc
 *.pem
 .cache/
+
+# Documentation
+docs/
