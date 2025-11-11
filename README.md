@@ -96,10 +96,10 @@ npm run dev
 
 ## 📊 Commandes disponibles
 
-- `/stats` - Affiche les statistiques du serveur
-- `/weekly-summary` - Génère un résumé hebdomadaire (avec IA si configurée)
-- `/ai-summary` - Résumé intelligent généré par IA (nécessite clé API)
-- `/recommendations` - Recommandations d'engagement basées sur l'IA
+- `/ci-stats` - Affiche les statistiques du serveur
+- `/ci-weekly-summary` - Génère un résumé hebdomadaire (avec IA si configurée)
+- `/ci-ai-summary` - Résumé intelligent généré par IA (nécessite clé API)
+- `/ci-recommendations` - Recommandations d'engagement basées sur l'IA
 
 ## 🚢 Déploiement sur Railway (gratuit)
 
@@ -153,8 +153,8 @@ Le bot supporte plusieurs providers d'IA pour des fonctionnalités avancées :
 
 ### Commandes IA disponibles
 
-- `/ai-summary` - Résumé intelligent généré par IA
-- `/recommendations` - Recommandations d'engagement personnalisées
+- `/ci-ai-summary` - Résumé intelligent généré par IA
+- `/ci-recommendations` - Recommandations d'engagement personnalisées
 
 ## 📊 Dashboard Web
 

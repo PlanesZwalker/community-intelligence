@@ -57,8 +57,8 @@ export async function commandHandler(interaction, client) {
 // Définir les commandes
 export const commands = [
   {
-    name: 'stats',
-    description: 'Affiche les statistiques de votre serveur',
+    name: 'ci-stats',
+    description: 'Affiche les statistiques de votre serveur (Community Intelligence)',
     execute: async (interaction, client) => {
       await interaction.deferReply();
 
@@ -82,8 +82,8 @@ export const commands = [
     },
   },
   {
-    name: 'weekly-summary',
-    description: 'Génère un résumé hebdomadaire de l\'activité',
+    name: 'ci-weekly-summary',
+    description: 'Génère un résumé hebdomadaire de l\'activité (Community Intelligence)',
     execute: async (interaction, client) => {
       await interaction.deferReply();
 
@@ -116,7 +116,7 @@ export const commands = [
     },
   },
   {
-    name: 'ai-summary',
+    name: 'ci-ai-summary',
     description: 'Génère un résumé intelligent avec IA (nécessite clé API)',
     execute: async (interaction, client) => {
       await interaction.deferReply();
@@ -149,7 +149,7 @@ export const commands = [
     },
   },
   {
-    name: 'recommendations',
+    name: 'ci-recommendations',
     description: 'Obtient des recommandations d\'engagement basées sur l\'IA',
     execute: async (interaction, client) => {
       await interaction.deferReply();
