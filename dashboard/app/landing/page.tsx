@@ -49,10 +49,10 @@ export default function LandingPage() {
         ],
         commands: [
           '/ci-ai-summary - Résumé intelligent de votre communauté',
-          '/ci-recommendations - Recommandations d\'engagement',
-          '/ci-sentiment - Analyse de sentiment des messages',
-          '/ci-predictions - Prédictions et alertes proactives',
-          '/ci-quest - Quêtes personnalisées générées par IA',
+          '/ci-recommendations - Recommandations d\'engagement personnalisées',
+          '/ci-sentiment - Analyse de sentiment des messages (positif/neutre/négatif)',
+          '/ci-predictions - Prédictions et alertes proactives pour les 7 prochains jours',
+          '/ci-quest - Quêtes personnalisées générées par IA pour chaque membre',
         ],
         benefits: [
           'Gratuit avec Groq (14,400 requêtes/jour)',
@@ -80,9 +80,10 @@ export default function LandingPage() {
           'Dashboard web interactif avec graphiques',
         ],
         commands: [
-          '/ci-stats - Statistiques complètes du serveur',
-          '/ci-weekly-summary - Résumé hebdomadaire automatique',
-          '/ci-predictions - Prédictions pour les 7 prochains jours',
+          '/ci-stats - Statistiques complètes du serveur en temps réel',
+          '/ci-weekly-summary - Résumé hebdomadaire automatique avec graphiques',
+          '/ci-predictions - Prédictions et tendances pour les 7 prochains jours',
+          '/ci-sync-history - Synchroniser l\'historique des messages passés',
         ],
         metrics: [
           'Messages totaux et par période',
@@ -119,8 +120,8 @@ export default function LandingPage() {
           'Alertes automatiques pour les comptes suspects',
         ],
         commands: [
-          '/ci-bot-detection - Analyse complète des bots et spam',
-          '/ci-trust-score - Score de confiance d\'un membre',
+          '/ci-bot-detection - Analyse complète des bots et spam dans le serveur',
+          '/ci-trust-score - Score de confiance (0-100) d\'un membre spécifique',
         ],
         detection: [
           'Comptes créés récemment (< 7 jours)',
@@ -156,8 +157,8 @@ export default function LandingPage() {
           'Statistiques de progression par membre',
         ],
         commands: [
-          '/ci-xp - Voir votre niveau XP et le leaderboard',
-          '/ci-badges - Voir vos badges et achievements',
+          '/ci-xp - Voir votre niveau XP, progression et le leaderboard du serveur',
+          '/ci-badges - Voir tous vos badges débloqués et achievements',
         ],
         mechanics: [
           'XP gagné par message (avec cooldown)',
@@ -192,7 +193,7 @@ export default function LandingPage() {
           'Graphiques d\'activité vocale dans le temps',
         ],
         commands: [
-          '/ci-voice-stats - Statistiques complètes de l\'activité vocale',
+          '/ci-voice-stats - Statistiques complètes de l\'activité vocale (temps, canaux, membres)',
         ],
         metrics: [
           'Temps total passé en vocal',
@@ -228,7 +229,7 @@ export default function LandingPage() {
           'Notifications automatiques des nouvelles quêtes',
         ],
         commands: [
-          '/ci-quest - Voir vos quêtes personnalisées du jour',
+          '/ci-quest - Voir vos quêtes personnalisées du jour générées par IA',
         ],
         types: [
           'Quêtes d\'engagement : messages, réactions, interactions',
@@ -466,11 +467,22 @@ export default function LandingPage() {
                         Commandes Discord
                       </h4>
                       <div className="space-y-2">
-                        {feature.details.commands.map((cmd, idx) => (
-                          <div key={idx} className="bg-gray-700/50 rounded-lg p-3 text-sm">
-                            <code className="text-blue-400 font-mono">{cmd}</code>
-                          </div>
-                        ))}
+                        {feature.details.commands.map((cmd, idx) => {
+                          const [commandName, description] = cmd.split(' - ');
+                          return (
+                            <div key={idx} className="bg-gray-700/50 rounded-lg p-3 text-sm hover:bg-gray-700 transition-colors">
+                              <div className="flex items-start gap-2">
+                                <code className="text-blue-400 font-mono font-semibold flex-shrink-0">{commandName}</code>
+                                <span className="text-gray-300 flex-1">{description}</span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <div className="mt-3 p-3 bg-blue-600/10 border border-blue-500/20 rounded-lg">
+                        <p className="text-blue-300 text-xs">
+                          💡 <strong>Astuce :</strong> Tapez ces commandes directement dans Discord pour utiliser cette fonctionnalité !
+                        </p>
                       </div>
                     </div>
                   )}
