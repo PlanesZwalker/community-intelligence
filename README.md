@@ -1,350 +1,890 @@
 # 🤖 Community Intelligence Bot
 
-Bot Discord d'analyse de communauté avec IA générative - MVP gratuit pour démarrer sans budget.
+Bot Discord d'analyse de communauté avec IA générative - Solution complète pour analyser, comprendre et améliorer votre communauté Discord.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> **🚀 Déploiement rapide** : Voir la documentation dans le dossier `docs/` (local uniquement)
+## 📋 Table des Matières
 
-## 🎯 Fonctionnalités
+- [Vue d'ensemble](#vue-densemble)
+- [Fonctionnalités Complètes](#fonctionnalités-complètes)
+- [Commandes Discord](#commandes-discord)
+- [Architecture Technique](#architecture-technique)
+- [Installation et Configuration](#installation-et-configuration)
+- [Déploiement](#déploiement)
+- [Système de Monétisation](#système-de-monétisation)
+- [Dashboard Web](#dashboard-web)
+- [Conformité et Sécurité](#conformité-et-sécurité)
+- [Documentation](#documentation)
 
-- ✅ **Collecte automatique des messages** - Stocke tous les messages pour analyse
-- ✅ **Statistiques en temps réel** - Commande `/ci-stats` pour voir l'activité
-- ✅ **Résumé hebdomadaire** - Commande `/ci-weekly-summary` pour un aperçu de la semaine
-- ✅ **Résumé IA intelligent** - Commande `/ci-ai-summary` avec Groq (gratuit)
-- ✅ **Détection de questions** - Identifie les questions posées
-- ✅ **Analytics de base** - Membres actifs, canaux populaires, etc.
-- 🏆 **Système de gamification** - XP/Levels avec leaderboard pour augmenter l'engagement (4x d'activité selon les études)
-- 🤖 **Détection de bots/spam** - Identifie les comptes suspects et les patterns de spam
-- 🧠 **Résumé IA avancé** - Chunking intelligent pour analyser TOUS les messages (même des milliers)
-- 📊 **Channel Counters** - Compteurs visuels dans les canaux (membres, messages, en ligne)
-- 😊 **Analyse de sentiment** - Détection du sentiment des messages avec IA (positif/neutre/négatif)
-- 🎁 **Récompenses automatiques** - Attribution automatique de rôles basés sur le niveau XP
-- 🔮 **Prédictions proactives** - Alertes et prédictions basées sur les tendances (game-changer)
-- 🎯 **Quêtes personnalisées** - Quêtes quotidiennes générées par IA pour chaque membre (4x engagement)
-- 📊 **Mod Performance** - Suivi de la performance des modérateurs avec métriques détaillées
-- 🎤 **Voice Analytics** - Tracking complet de l'activité vocale (temps, canaux, heures de pic)
-- 🛡️ **Score de confiance** - Détection avancée de spam avec score 0-100 par membre
-- 🏆 **Badges visuels** - Système d'achievements avec badges débloquables
-- 👋 **Onboarding intelligent** - Accueil automatique personnalisé avec suggestions de rôles/canaux
-- 💳 **Intégration Stripe** - Paiements sécurisés avec checkout et portail de facturation
+## Vue d'ensemble
 
-## 🚀 Installation
+Community Intelligence Bot est une solution complète d'analyse et d'intelligence pour les communautés Discord. Le bot collecte automatiquement les données de votre serveur, les analyse avec des algorithmes avancés et de l'IA générative, et fournit des insights actionnables pour améliorer l'engagement et la croissance de votre communauté.
+
+### Caractéristiques Principales
+
+- **Collecte Automatique** : Enregistrement automatique de tous les messages, réactions, et interactions
+- **Analyse en Temps Réel** : Statistiques et métriques mises à jour en continu
+- **IA Générative** : Résumés intelligents, recommandations, et prédictions avec Groq (gratuit)
+- **Gamification Complète** : Système XP/Levels avec leaderboard pour augmenter l'engagement jusqu'à 4x
+- **Détection Anti-Spam** : Score de confiance et détection automatique des bots et spam
+- **Analytics Avancés** : Prédictions, tendances, et insights proactifs
+- **Monétisation Intégrée** : Système de plans premium avec Stripe
+
+## Fonctionnalités Complètes
+
+### 📊 Statistiques et Analytics
+
+#### Collecte de Données
+- **Collecte Automatique** : Tous les messages sont automatiquement stockés dans Supabase
+- **Synchronisation Historique** : Récupération des messages passés avec `/ci-sync-history`
+- **Métadonnées Complètes** : Auteur, canal, date, réactions, mentions, questions détectées
+- **Détection de Questions** : Identification automatique des questions posées dans les messages
+
+#### Statistiques en Temps Réel
+- **Messages Totaux** : Comptage de tous les messages par période
+- **Membres Actifs** : Identification des membres les plus engagés
+- **Canaux Populaires** : Analyse de l'activité par canal
+- **Taux d'Engagement** : Calcul du taux de réponse aux questions
+- **Heures de Pic** : Identification des moments les plus actifs
+- **Graphiques Temporels** : Visualisation de l'activité dans le temps
+
+#### Analytics Avancés
+- **Top Membres** : Classement des membres les plus actifs
+- **Top Canaux** : Identification des canaux les plus populaires
+- **Tendances** : Analyse des tendances d'activité
+- **Métriques d'Engagement** : Taux de réaction, interactions, croissance
+- **Export de Données** : Export CSV des statistiques (premium)
+
+### 🤖 Intelligence Artificielle Générative
+
+#### Résumés Intelligents
+- **Résumé IA** : Génération automatique de résumés avec `/ci-ai-summary`
+- **Chunking Intelligent** : Traitement de milliers de messages avec découpage automatique
+- **Résumé Récursif** : Résumés de résumés pour gérer de très grands volumes
+- **Modèles Groq** : Utilisation de modèles gratuits (llama-3.1-8b-instant, llama-3.3-70b-versatile)
+- **Fallback Automatique** : Bascule automatique vers d'autres modèles en cas d'erreur
+
+#### Analyse de Sentiment
+- **Détection de Sentiment** : Analyse positive/neutre/négative avec `/ci-sentiment`
+- **Analyse par Canal** : Sentiment spécifique à chaque canal
+- **Analyse Globale** : Sentiment général du serveur sur une période
+- **Tendances de Sentiment** : Évolution du sentiment dans le temps
+
+#### Recommandations et Prédictions
+- **Recommandations Personnalisées** : Suggestions d'engagement avec `/ci-recommendations`
+- **Prédictions Proactives** : Alertes pour les 7 prochains jours avec `/ci-predictions`
+- **Détection de Problèmes** : Identification des questions non résolues
+- **Alertes Automatiques** : Notifications pour VIP inactifs, chutes d'activité
+
+#### Quêtes Personnalisées
+- **Génération par IA** : Quêtes quotidiennes générées avec `/ci-quest`
+- **Personnalisation** : Adaptation selon le rôle et l'activité du membre
+- **Types de Quêtes** : Engagement, découverte, sociales, créatives, modération
+- **Récompenses XP** : Attribution automatique de points pour les quêtes complétées
+
+### 🏆 Système de Gamification
+
+#### Points d'Expérience (XP)
+- **Attribution Automatique** : XP gagné par message envoyé
+- **Cooldown Intelligent** : Système de cooldown pour éviter le spam
+- **XP Bonus** : Points supplémentaires pour réactions et interactions
+- **Formule Équilibrée** : Calcul des niveaux avec progression équilibrée
+
+#### Niveaux et Leaderboard
+- **Système de Niveaux** : Progression de niveau basée sur l'XP total
+- **Leaderboard en Temps Réel** : Classement des membres les plus actifs
+- **Rang Utilisateur** : Position dans le classement du serveur
+- **Progression Visible** : Affichage de la progression vers le niveau suivant
+
+#### Récompenses Automatiques
+- **Attribution de Rôles** : Rôles automatiques basés sur le niveau XP
+- **Configuration Flexible** : Définition des niveaux et rôles associés
+- **Badges Visuels** : Système d'achievements avec badges débloquables
+- **Statistiques de Progression** : Suivi détaillé de la progression de chaque membre
+
+### 🛡️ Détection Anti-Spam et Sécurité
+
+#### Score de Confiance
+- **Score 0-100** : Évaluation de la confiance de chaque membre avec `/ci-trust-score`
+- **Calcul Multi-Critères** : Analyse basée sur plusieurs facteurs
+- **Historique** : Suivi de l'évolution du score dans le temps
+
+#### Détection de Bots et Spam
+- **Analyse Multi-Critères** : Détection avec `/ci-bot-detection`
+  - Comptes créés récemment (< 7 jours)
+  - Absence d'avatar personnalisé
+  - Messages répétitifs ou identiques
+  - Liens suspects ou URLs raccourcies
+  - Fréquence de messages anormale
+  - Patterns de spam connus
+- **Analyse par Canal** : Contexte spécifique à chaque canal
+- **Détection de Pics** : Identification des pics d'activité suspects
+- **Alertes Automatiques** : Notifications pour les comptes suspects
+
+### 📊 Channel Counters
+
+#### Compteurs Visuels
+- **Mise à Jour Dynamique** : Noms de canaux mis à jour automatiquement
+- **Types de Compteurs** : Membres, messages, en ligne, messages aujourd'hui
+- **Gestion Flexible** : Création et suppression avec `/ci-counter`
+- **Mise à Jour Périodique** : Actualisation automatique toutes les 5 minutes
+
+### 🎤 Voice Analytics
+
+#### Tracking Vocal
+- **Sessions Vocales** : Enregistrement automatique des sessions
+- **Durée Totale** : Temps passé en vocal par membre
+- **Canaux Populaires** : Identification des canaux vocaux les plus utilisés
+- **Heures de Pic** : Moments les plus actifs en vocal
+- **Statistiques Détaillées** : Rapport complet avec `/ci-voice-stats`
+
+### 📊 Mod Performance Tracking
+
+#### Suivi des Modérateurs
+- **Métriques de Performance** : Activité, réactivité, engagement
+- **Rapport Détaillé** : Analyse complète avec `/ci-mod-report`
+- **Comparaison** : Benchmarking entre modérateurs
+- **Recommandations** : Suggestions d'amélioration
+
+### 👋 Onboarding Intelligent
+
+#### Accueil Automatique
+- **Analyse des Intérêts** : Détection des centres d'intérêt du nouveau membre
+- **Messages de Bienvenue** : Accueil personnalisé avec suggestions
+- **Recommandations de Canaux** : Suggestions de canaux pertinents
+- **Recommandations de Rôles** : Suggestions de rôles adaptés
+
+### 🏆 Badges et Achievements
+
+#### Système de Badges
+- **Badges Débloquables** : Achievements visuels avec `/ci-badges`
+- **Conditions Variées** : Déblocage basé sur différents critères
+- **Affichage Public** : Badges visibles dans le profil
+- **Collection Complète** : Suivi de tous les badges disponibles
+
+## Commandes Discord
+
+### Commandes de Statistiques
+
+#### `/ci-stats`
+- **Description** : Affiche les statistiques complètes du serveur en temps réel
+- **Données Affichées** :
+  - Messages totaux
+  - Membres actifs
+  - Canaux actifs
+  - Questions posées
+  - Taux de réponse
+  - Messages populaires
+- **Disponibilité** : Tous les plans
+
+#### `/ci-weekly-summary`
+- **Description** : Génère un résumé hebdomadaire automatique de l'activité
+- **Contenu** :
+  - Top 3 membres actifs
+  - Canaux les plus actifs
+  - Questions sans réponse
+  - Résumé IA (si configuré)
+- **Disponibilité** : Tous les plans
+
+#### `/ci-sync-history`
+- **Description** : Synchronise l'historique des messages depuis Discord vers la base de données
+- **Fonctionnement** :
+  - Récupère jusqu'à 100 messages par canal
+  - Traite jusqu'à 50 canaux par serveur
+  - Vérification automatique des doublons
+- **Disponibilité** : Tous les plans
+
+### Commandes IA et Intelligence
+
+#### `/ci-ai-summary`
+- **Description** : Résumé intelligent généré par IA avec chunking automatique
+- **Fonctionnalités** :
+  - Traitement de milliers de messages
+  - Découpage intelligent en chunks
+  - Résumé récursif pour très grands volumes
+  - Utilisation de modèles Groq gratuits
+- **Limites** : Premium uniquement (limité sur Gratuit)
+- **Disponibilité** : Pro, Business, Enterprise
+
+#### `/ci-recommendations`
+- **Description** : Recommandations d'engagement personnalisées basées sur l'analyse IA
+- **Contenu** :
+  - Suggestions d'amélioration de l'engagement
+  - Identification des opportunités
+  - Recommandations actionnables
+- **Disponibilité** : Tous les plans (limité sur Gratuit)
+
+#### `/ci-sentiment`
+- **Description** : Analyse de sentiment des messages (positif/neutre/négatif)
+- **Options** :
+  - Analyse par canal spécifique
+  - Analyse globale du serveur
+  - Période personnalisable
+- **Disponibilité** : Pro, Business, Enterprise
+
+#### `/ci-predictions`
+- **Description** : Prédictions et alertes proactives pour les 7 prochains jours
+- **Contenu** :
+  - Tendances d'activité prévues
+  - Alertes pour VIP inactifs
+  - Détection de chutes d'activité
+  - Recommandations proactives
+- **Disponibilité** : Pro, Business, Enterprise
+
+#### `/ci-quest`
+- **Description** : Quêtes personnalisées quotidiennes générées par IA pour chaque membre
+- **Types de Quêtes** :
+  - Engagement (messages, réactions)
+  - Découverte (explorer canaux)
+  - Sociales (aider membres)
+  - Créatives (partager contenu)
+  - Modération (signaler spam)
+- **Récompenses** : XP pour chaque quête complétée
+- **Disponibilité** : Pro, Business, Enterprise
+
+### Commandes de Gamification
+
+#### `/ci-xp`
+- **Description** : Affiche votre niveau XP, progression et le leaderboard du serveur
+- **Informations Affichées** :
+  - Niveau actuel
+  - XP total
+  - XP nécessaire pour le niveau suivant
+  - Rang dans le serveur
+  - Top 10 du leaderboard
+- **Disponibilité** : Tous les plans
+
+#### `/ci-badges`
+- **Description** : Affiche tous vos badges débloqués et achievements disponibles
+- **Contenu** :
+  - Liste des badges obtenus
+  - Badges disponibles à débloquer
+  - Conditions de déblocage
+- **Disponibilité** : Tous les plans
+
+### Commandes de Sécurité
+
+#### `/ci-bot-detection`
+- **Description** : Analyse complète des bots et spam dans le serveur
+- **Critères Analysés** :
+  - Comptes récents
+  - Absence d'avatar
+  - Messages répétitifs
+  - Liens suspects
+  - Fréquence anormale
+  - Patterns de spam
+- **Résultats** : Liste des comptes suspects avec scores
+- **Disponibilité** : Tous les plans
+
+#### `/ci-trust-score`
+- **Description** : Score de confiance (0-100) d'un membre spécifique
+- **Paramètres** : Mention ou ID du membre
+- **Calcul** : Basé sur plusieurs critères de confiance
+- **Disponibilité** : Tous les plans
+
+### Commandes de Fonctionnalités Avancées
+
+#### `/ci-counter`
+- **Description** : Gère les compteurs visuels dans les canaux
+- **Actions** :
+  - Créer un compteur (membres, messages, en ligne, messages aujourd'hui)
+  - Supprimer un compteur
+  - Lister tous les compteurs
+- **Mise à Jour** : Automatique toutes les 5 minutes
+- **Disponibilité** : Pro, Business, Enterprise
+
+#### `/ci-voice-stats`
+- **Description** : Statistiques complètes de l'activité vocale (temps, canaux, membres)
+- **Métriques** :
+  - Temps total passé en vocal
+  - Nombre de sessions
+  - Membres actifs en vocal
+  - Canaux vocaux les plus utilisés
+  - Heures de pic
+  - Durée moyenne des sessions
+- **Disponibilité** : Pro, Business, Enterprise
+
+#### `/ci-mod-report`
+- **Description** : Rapport de performance des modérateurs avec métriques détaillées
+- **Métriques** :
+  - Activité des modérateurs
+  - Réactivité aux problèmes
+  - Engagement avec la communauté
+  - Comparaison entre modérateurs
+- **Disponibilité** : Business, Enterprise
+
+### Commandes Premium
+
+#### `/ci-upgrade`
+- **Description** : Passer à un plan premium (Stripe)
+- **Plans Disponibles** :
+  - Pro (25€/mois)
+  - Business (75€/mois)
+  - Enterprise (250€/mois)
+- **Fonctionnement** : Crée une session Stripe Checkout
+- **Disponibilité** : Tous les plans
+
+#### `/ci-billing`
+- **Description** : Gérer votre abonnement et factures via le portail Stripe
+- **Fonctionnalités** :
+  - Voir les factures
+  - Modifier le plan
+  - Annuler l'abonnement
+  - Mettre à jour le moyen de paiement
+- **Disponibilité** : Utilisateurs premium uniquement
+
+#### `/ci-plan`
+- **Description** : Affiche votre plan actuel et les fonctionnalités disponibles
+- **Informations** :
+  - Plan actuel (Free, Pro, Business, Enterprise)
+  - Statut de l'abonnement
+  - Fonctionnalités incluses
+  - Date de renouvellement
+- **Disponibilité** : Tous les plans
+
+#### `/ci-help`
+- **Description** : Affiche toutes les commandes disponibles organisées par catégories
+- **Catégories** :
+  - Statistiques & Analytics
+  - IA & Intelligence
+  - Gamification
+  - Sécurité & Modération
+  - Fonctionnalités Avancées
+  - Premium & Abonnement
+- **Disponibilité** : Tous les plans
+
+## Architecture Technique
+
+### Structure du Projet
+
+```
+community-intelligence/
+├── src/                          # Code source du bot Discord
+│   ├── index.js                  # Point d'entrée principal
+│   ├── handlers/                 # Gestionnaires d'événements
+│   │   ├── commandHandler.js     # Gestion des commandes slash (20 commandes)
+│   │   └── messageHandler.js     # Gestion des messages et collecte
+│   └── utils/                    # Utilitaires et services
+│       ├── aiService.js          # Service IA (Groq, OpenAI, etc.)
+│       ├── analytics.js          # Analytics de base
+│       ├── badges.js             # Système de badges
+│       ├── botDetection.js       # Détection bots/spam
+│       ├── channelCounters.js    # Compteurs de canaux
+│       ├── chunkedSummary.js     # Résumé IA avec chunking
+│       ├── onboarding.js         # Onboarding intelligent
+│       ├── predictions.js        # Prédictions et alertes
+│       ├── premium.js            # Gestion plans premium
+│       ├── questSystem.js        # Système de quêtes
+│       ├── registerCommands.js   # Enregistrement commandes Discord
+│       ├── sentimentAnalysis.js  # Analyse de sentiment
+│       ├── stripe.js            # Intégration Stripe
+│       ├── syncHistory.js       # Synchronisation historique
+│       ├── voiceAnalytics.js    # Analytics vocales
+│       ├── weeklySummary.js     # Résumé hebdomadaire
+│       ├── xpRewards.js         # Récompenses XP
+│       └── xpSystem.js           # Système XP/Levels
+├── dashboard/                    # Dashboard web Next.js
+│   ├── app/                      # Pages Next.js (App Router)
+│   │   ├── dashboard/           # Dashboard utilisateur
+│   │   ├── landing/             # Landing page publique
+│   │   ├── privacy/             # Politique de confidentialité RGPD
+│   │   ├── terms/               # Conditions d'utilisation
+│   │   ├── cgv/                 # Conditions générales de vente
+│   │   └── api/                 # API routes
+│   │       └── stripe/          # Routes Stripe (checkout, billing)
+│   └── ...
+├── supabase/                     # Schémas SQL Supabase
+│   ├── schema.sql               # Schéma de base
+│   ├── schema_gamification.sql  # Schéma gamification
+│   ├── schema_premium.sql      # Schéma premium
+│   ├── schema_stripe.sql       # Schéma Stripe
+│   ├── schema_voice.sql        # Schéma voice analytics
+│   └── schema_channel_counters.sql # Schéma channel counters
+└── docs/                         # Documentation complète
+```
+
+### Base de Données
+
+#### Tables Principales
+
+**messages**
+- Stockage de tous les messages Discord
+- Champs : id, guild_id, channel_id, author_id, content, created_at, reaction_count, is_question
+- Index sur guild_id, channel_id, author_id pour performances
+
+**guild_stats**
+- Statistiques agrégées par serveur
+- Champs : guild_id, total_messages, active_members, active_channels, last_updated
+- Mise à jour périodique automatique
+
+**guild_config**
+- Configuration par serveur
+- Champs : guild_id, config_key, config_value
+- Configuration flexible et extensible
+
+**user_xp**
+- Système de gamification
+- Champs : user_id, guild_id, xp, level, last_message_at
+- Calcul automatique des niveaux
+
+**guild_subscriptions**
+- Abonnements premium Stripe
+- Champs : guild_id, stripe_customer_id, plan_type, status, current_period_end
+- Synchronisation avec Stripe via webhooks
+
+**voice_sessions**
+- Sessions vocales
+- Champs : user_id, guild_id, channel_id, start_time, end_time, duration
+- Tracking automatique des entrées/sorties
+
+**channel_counters**
+- Configuration des compteurs
+- Champs : guild_id, channel_id, counter_type, enabled
+- Mise à jour automatique des noms de canaux
+
+### Intégrations
+
+#### Discord.js
+- **Version** : Latest
+- **Intents Requis** : MESSAGE_CONTENT_INTENT, SERVER_MEMBERS_INTENT, GUILD_VOICE_STATES
+- **Événements Gérés** : MessageCreate, InteractionCreate, VoiceStateUpdate, GuildMemberAdd
+
+#### Supabase
+- **Type** : PostgreSQL
+- **Authentification** : OAuth2 Discord pour le dashboard
+- **Stockage** : Données structurées avec relations
+- **API** : REST et Realtime
+
+#### Groq API
+- **Provider IA Principal** : Gratuit, 14,400 requêtes/jour
+- **Modèles** : llama-3.1-8b-instant, llama-3.3-70b-versatile, openai/gpt-oss-20b
+- **Fallback** : Système de fallback automatique vers autres modèles
+
+#### Stripe
+- **Intégration** : Checkout Sessions, Billing Portal, Webhooks
+- **Paiements** : Abonnements mensuels récurrents
+- **Sécurité** : PCI-DSS niveau 1, données bancaires non stockées
+
+## Installation et Configuration
 
 ### Prérequis
 
-- Node.js 18+ 
-- Compte Discord Developer
-- Compte Supabase (gratuit)
+- **Node.js** : Version 18.17.0 ou supérieure
+- **Compte Discord Developer** : Pour créer le bot
+- **Compte Supabase** : Base de données gratuite
+- **Compte Groq** (optionnel) : Pour fonctionnalités IA gratuites
+- **Compte Stripe** (optionnel) : Pour monétisation
 
-### 1. Cloner et installer
+### Configuration Discord
 
-```bash
-npm install
-```
+1. Créer une application sur https://discord.com/developers/applications
+2. Créer un bot et copier le token
+3. Activer les intents requis :
+   - MESSAGE CONTENT INTENT
+   - SERVER MEMBERS INTENT
+   - GUILD VOICE STATES (pour voice analytics)
+4. Configurer OAuth2 pour le dashboard :
+   - Scopes : `bot`, `applications.commands`
+   - Permissions : Read Messages, Send Messages, Read Message History
+   - Redirect URI : `https://[votre-projet].supabase.co/auth/v1/callback`
 
-### 2. Configuration Discord
+### Configuration Supabase
 
-1. Allez sur https://discord.com/developers/applications
-2. Créez une nouvelle application
-3. Allez dans "Bot" et créez un bot
-4. Copiez le **Token** (vous en aurez besoin)
-5. Activez les **Privileged Gateway Intents** :
-   - ✅ MESSAGE CONTENT INTENT
-   - ✅ SERVER MEMBERS INTENT
-6. Allez dans "OAuth2" > "URL Generator"
-7. Sélectionnez les scopes : `bot`, `applications.commands`
-8. Sélectionnez les permissions : `Read Messages`, `Send Messages`, `Read Message History`
-9. Invitez le bot sur votre serveur avec l'URL générée
+#### Schémas SQL Requis
 
-### 3. Configuration Supabase
+1. **Schéma de Base** (`supabase/schema.sql`)
+   - Tables : messages, guild_stats, guild_config
+   - Index et contraintes
 
-1. Créez un compte sur https://supabase.com (gratuit)
-2. Créez un nouveau projet
-3. **⚠️ IMPORTANT** : Créez les tables de base de données :
-   - Allez dans "SQL Editor"
-   - Cliquez sur "New query"
-   - Copiez-collez le contenu du fichier `supabase/schema.sql`
-   - Cliquez sur "Run" (ou `Ctrl+Enter`)
-   - Vérifiez que les 3 tables apparaissent dans "Table Editor" :
-     - ✅ `messages`
-     - ✅ `guild_stats`
-     - ✅ `guild_config`
-4. Allez dans "Settings" > "API"
-5. Copiez l'**URL du projet** et la **clé anon public**
+2. **Schéma Gamification** (`supabase/schema_gamification.sql`)
+   - Tables : user_xp, xp_rewards, user_badges
+   - Triggers pour calcul automatique des niveaux
 
-📖 **Guide détaillé** : Voir la section [Création des tables Supabase](#création-des-tables-supabase) dans `docs/GUIDE_COMPLET.md`
+3. **Schéma Premium** (`supabase/schema_premium.sql`)
+   - Tables : subscriptions, usage_limits
+   - Gestion des limites par plan
 
-### 🏆 Système de Gamification (Nouveau !)
+4. **Schéma Stripe** (`supabase/schema_stripe.sql`)
+   - Table : guild_subscriptions
+   - Synchronisation avec Stripe
 
-Le bot inclut maintenant un système de gamification pour augmenter l'engagement :
+5. **Schéma Voice** (`supabase/schema_voice.sql`)
+   - Table : voice_sessions
+   - Tracking des sessions vocales
 
-1. **Exécutez le schéma de gamification** :
-   - Allez dans Supabase > SQL Editor
-   - Copiez-collez le contenu de `supabase/schema_gamification.sql`
-   - Cliquez sur "Run"
+6. **Schéma Channel Counters** (`supabase/schema_channel_counters.sql`)
+   - Table : channel_counters
+   - Configuration des compteurs
 
-2. **Le système est automatiquement activé** après redéploiement du bot
+#### Configuration Auth Discord
 
-3. **Utilisez `/ci-xp`** pour voir votre niveau et le leaderboard
+1. Aller dans Supabase > Authentication > Providers
+2. Activer Discord
+3. Configurer :
+   - Client ID : ID de votre application Discord
+   - Client Secret : Secret de votre application Discord
+   - Redirect URL : `https://[votre-projet].supabase.co/auth/v1/callback`
 
-📖 **Guide complet** : Voir [docs/GAMIFICATION_SETUP.md](./docs/GAMIFICATION_SETUP.md) pour la configuration avancée
+### Variables d'Environnement
 
-### 4. Variables d'environnement
-
-Créez un fichier `.env` à la racine :
+#### Bot Discord (Render)
 
 ```env
+# Discord
 DISCORD_TOKEN=votre_token_discord
 DISCORD_CLIENT_ID=votre_client_id_discord
-SUPABASE_URL=votre_url_supabase
-SUPABASE_KEY=votre_cle_supabase
+
+# Supabase
+SUPABASE_URL=https://[projet].supabase.co
+SUPABASE_KEY=votre_cle_anon_public
+
+# IA (Optionnel)
+AI_PROVIDER=groq
+GROQ_API_KEY=votre_cle_groq
+
+# Stripe (Optionnel - pour monétisation)
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+
+# Options
 NODE_ENV=production
+SYNC_HISTORY_ON_START=false
 ```
 
-**Où trouver ces valeurs :**
-- **DISCORD_TOKEN** : Discord Developer Portal > Bot > Token
-- **DISCORD_CLIENT_ID** : Discord Developer Portal > General Information > Application ID
-- **SUPABASE_URL** : Supabase > Settings > API > Project URL
-- **SUPABASE_KEY** : Supabase > Settings > API > anon public key
+#### Dashboard Web (Vercel)
 
-📖 **Guide complet** : Voir [docs/GUIDE_COMPLET.md](./docs/GUIDE_COMPLET.md)
+```env
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=https://[projet].supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=votre_cle_anon_public
+SUPABASE_SERVICE_ROLE_KEY=votre_cle_service_role
 
-💡 **Votre projet Supabase** : https://supabase.com/dashboard/project/twpznfiyatzuwkyfgudh
+# Stripe (Optionnel)
+STRIPE_SECRET_KEY=sk_test_...
+NEXT_PUBLIC_SITE_URL=https://votre-site.vercel.app
 
-### 5. Lancer le bot
-
-```bash
-npm start
+# Discord (pour OAuth)
+NEXT_PUBLIC_DISCORD_CLIENT_ID=votre_client_id_discord
+DISCORD_CLIENT_SECRET=votre_client_secret_discord
 ```
 
-Pour le développement avec rechargement automatique :
+## Déploiement
 
-```bash
-npm run dev
-```
+### Bot Discord sur Render
 
-## 📊 Commandes disponibles
-
-- `/ci-stats` - Affiche les statistiques du serveur
-- `/ci-weekly-summary` - Génère un résumé hebdomadaire (avec IA si configurée)
-- `/ci-ai-summary` - Résumé intelligent généré par IA avec chunking intelligent (traite TOUS les messages)
-- `/ci-recommendations` - Recommandations d'engagement basées sur l'IA
-- `/ci-sync-history` - Synchronise l'historique des messages depuis Discord vers la base de données
-- `/ci-xp` - Affiche votre niveau XP et le leaderboard du serveur (🏆 Gamification)
-- `/ci-bot-detection` - Détecte les bots et spam dans votre serveur (🤖 Anti-spam)
-- `/ci-counter` - Gère les compteurs visuels dans les canaux (📊 Channel Counters)
-- `/ci-sentiment` - Analyse le sentiment des messages (😊 Sentiment Analysis)
-- `/ci-predictions` - 🔮 Prédictions et alertes proactives pour les 7 prochains jours
-- `/ci-quest` - 🎯 Quêtes personnalisées quotidiennes générées par IA
-- `/ci-mod-report` - 📊 Rapport de performance des modérateurs
-- `/ci-voice-stats` - 🎤 Statistiques de l'activité vocale du serveur
-- `/ci-trust-score` - 🛡️ Score de confiance d'un membre (détection spam avancée)
-- `/ci-badges` - 🏆 Badges et achievements visuels
-- `/ci-upgrade` - 💳 Passer à un plan premium (Stripe)
-- `/ci-billing` - 💳 Gérer votre abonnement et factures
-- `/ci-plan` - 📊 Affiche votre plan actuel et les fonctionnalités disponibles
-
-> **⏱️ Note importante** : Les commandes globales peuvent prendre jusqu'à **1 heure** pour apparaître dans Discord après l'enregistrement. Si les commandes n'apparaissent pas immédiatement, attendez quelques minutes ou utilisez-les directement en tapant `/ci-stats` même si elles n'apparaissent pas dans l'autocomplétion.
-
-### 🔄 Synchronisation de l'historique
-
-Par défaut, le bot collecte uniquement les **nouveaux messages** envoyés après son activation. Pour récupérer l'historique des messages passés :
-
-1. **Manuellement** : Utilisez la commande `/ci-sync-history` dans Discord
-   - Récupère jusqu'à 100 messages par canal
-   - Traite jusqu'à 50 canaux par serveur
-   - Peut prendre plusieurs minutes selon le nombre de canaux
-
-2. **Automatiquement au démarrage** : Ajoutez dans vos variables d'environnement :
-   ```env
-   SYNC_HISTORY_ON_START=true
-   ```
-   ⚠️ **Attention** : Cela peut ralentir le démarrage du bot si vous avez beaucoup de canaux.
-
-> **💡 Note** : La synchronisation vérifie automatiquement les doublons, vous pouvez l'exécuter plusieurs fois sans risque.
-
-## 🚢 Déploiement sur Render (gratuit)
-
-1. Créez un compte sur https://render.com
-2. Cliquez sur "New +" > "Web Service"
-3. Connectez votre repo GitHub
-4. Configurez le service :
-   - **Name** : `community-intelligence-bot` (ou votre choix)
-   - **Environment** : `Node`
+1. Créer un compte sur https://render.com
+2. Créer un nouveau Web Service
+3. Connecter le repository GitHub
+4. Configuration :
    - **Build Command** : `npm install`
    - **Start Command** : `node src/index.js`
    - **Plan** : Free (gratuit)
-5. Ajoutez les variables d'environnement dans "Environment"
-6. Cliquez sur "Create Web Service"
-7. Le bot se déploiera automatiquement !
+5. Ajouter les variables d'environnement
+6. Déployer
 
-### Variables à ajouter sur Render :
+### Dashboard Web sur Vercel
 
-- `DISCORD_TOKEN`
-- `DISCORD_CLIENT_ID`
-- `SUPABASE_URL`
-- `SUPABASE_KEY`
-- `NODE_ENV=production`
-- `AI_PROVIDER=groq` (optionnel)
-- `GROQ_API_KEY` (optionnel - gratuit sur https://console.groq.com)
-- `SYNC_HISTORY_ON_START=true` (optionnel - synchronise l'historique au démarrage)
+1. Créer un compte sur https://vercel.com
+2. Importer le repository GitHub
+3. Configuration :
+   - **Root Directory** : `dashboard`
+   - **Framework Preset** : Next.js
+4. Ajouter les variables d'environnement
+5. Déployer
 
-## 🤖 Intégration IA (Optionnel - GRATUIT avec Groq !)
+📖 **Guides détaillés** :
+- [dashboard/VERCEL_DEPLOY.md](./dashboard/VERCEL_DEPLOY.md) - Déploiement dashboard
+- [docs/VERCEL_DEPLOY_NOW.md](./docs/VERCEL_DEPLOY_NOW.md) - Guide rapide
 
-Le bot supporte plusieurs providers d'IA pour des fonctionnalités avancées :
-
-### Groq (GRATUIT - Recommandé) ⭐
-
-- **Gratuit** : 14,400 requêtes/jour (plan gratuit)
-- **Très rapide** : Réponses en millisecondes
-- **Modèles GRATUITS utilisés** (plan gratuit uniquement) : 
-  - `llama-3.1-8b-instant` (560 t/s - le moins cher, recommandé)
-  - `openai/gpt-oss-20b` (1000 t/s - très rapide)
-  - `llama-3.3-70b-versatile` (280 t/s - meilleure qualité si quota disponible)
-- **⚠️ Important** : Tous ces modèles sont gratuits dans le plan gratuit de Groq
-- **Documentation** : https://console.groq.com/docs/models
-- **Inscription** : https://console.groq.com
-
-**⚠️ Important** : Si un lien d'authentification ne fonctionne pas, allez directement sur https://console.groq.com et créez un compte normalement.
-
-1. Allez sur https://console.groq.com
-2. Cliquez sur **"Sign Up"** (gratuit)
-3. Connectez-vous avec Google, GitHub ou Email
-4. Allez dans **"API Keys"** et créez une clé
-5. Ajoutez dans `.env` :
-   ```env
-   AI_PROVIDER=groq
-   GROQ_API_KEY=votre_cle_groq
-   ```
-
-📖 **Guide complet** : Voir [docs/GUIDE_COMPLET.md](./docs/GUIDE_COMPLET.md)
-
-### Autres options
-
-- **Hugging Face** : Gratuit (30k req/mois) - https://huggingface.co
-- **OpenAI** : Payant (5$ crédits gratuits) - https://platform.openai.com
-- **Anthropic Claude** : Payant (5$ crédits gratuits) - https://console.anthropic.com
-
-### Commandes IA disponibles
-
-- `/ci-ai-summary` - Résumé intelligent généré par IA
-- `/ci-recommendations` - Recommandations d'engagement personnalisées
-
-## 📊 Dashboard Web
-
-Un dashboard web moderne est disponible dans le dossier `dashboard/` pour visualiser vos analytics !
-
-### Fonctionnalités du dashboard
-
-- ✅ Authentification Discord OAuth2
-- ✅ Visualisation des statistiques en temps réel
-- ✅ Graphiques d'activité (7 derniers jours)
-- ✅ Top membres actifs
-- ✅ Stats par serveur
-- ✅ Design moderne et responsive
-
-### Déploiement
-
-Voir la documentation dans le dossier `docs/` (local uniquement) pour les instructions complètes.
-
-**Déploiement rapide sur Vercel :**
-1. Voir la documentation dans `dashboard/VERCEL_DEPLOY.md`
-2. Connectez votre repo GitHub à Vercel
-3. Configurez le **Root Directory** : `dashboard`
-4. Ajoutez les variables d'environnement Supabase
-5. Déployez en 2 minutes !
-
-📖 **Guide complet** : Voir [dashboard/VERCEL_DEPLOY.md](./dashboard/VERCEL_DEPLOY.md) ou [docs/VERCEL_DEPLOY_NOW.md](./docs/VERCEL_DEPLOY_NOW.md)
-
-## 📈 Prochaines étapes
-
-Une fois que vous avez des revenus, vous pouvez ajouter :
-
-- 📧 **Rapports automatiques** envoyés dans un canal
-- 🎯 **Détection de sentiment** avancée
-- 👥 **Recommandations d'engagement** plus poussées
-- 🔔 **Notifications** dans le dashboard
-- 📤 **Export des données** (CSV, PDF)
-
-## 💰 Système de Monétisation (En Développement)
-
-Le bot supporte un système de plans premium pour monétiser vos fonctionnalités :
+## Système de Monétisation
 
 ### Plans Disponibles
 
-- **🆓 Free** : 10,000 messages, 10 canaux, fonctionnalités de base
-- **💎 Pro (15€/mois)** : Illimité, IA, exports, rapports automatiques
-- **🏢 Enterprise (50€/mois)** : Tout Pro + API REST, webhooks, support dédié
+#### 🆓 Plan Gratuit
+- **Prix** : 0€/mois
+- **Limites** :
+  - 1 serveur
+  - 10,000 messages/mois
+  - 10 canaux maximum
+- **Fonctionnalités** :
+  - Statistiques basiques
+  - Gamification limitée
+  - Détection spam basique
+  - Dashboard web
+- **Restrictions** :
+  - Pas d'IA générative
+  - Pas d'export de données
+  - Pas de fonctionnalités avancées
 
-### Fonctionnalités Premium
+#### 💎 Plan Pro
+- **Prix** : 25€/mois
+- **Limites** :
+  - 5 serveurs
+  - Messages illimités
+  - Canaux illimités
+- **Fonctionnalités** :
+  - Toutes les fonctionnalités Gratuit +
+  - Résumés IA avec Groq
+  - Analyse de sentiment
+  - Prédictions et alertes
+  - Channel counters
+  - Voice analytics
+  - Quêtes personnalisées
+  - Export CSV
+- **Disponibilité** : Disponible maintenant
 
-- ✅ **Rapports automatiques** - Envoi automatique de résumés dans un canal
-- ✅ **Export de données** - CSV, JSON, PDF
-- ✅ **Analytics avancés** - Sentiment, tendances, prédictions
-- ✅ **API REST** - Intégrations personnalisées (Enterprise)
-- ✅ **Webhooks** - Notifications d'événements (Enterprise)
+#### 🚀 Plan Business
+- **Prix** : 75€/mois
+- **Limites** :
+  - Serveurs illimités
+  - Messages illimités
+  - Canaux illimités
+- **Fonctionnalités** :
+  - Toutes les fonctionnalités Pro +
+  - Mod performance tracking
+  - Benchmarking
+  - Webhooks
+  - API REST
+  - Discord SEO
+  - Support prioritaire
+- **Disponibilité** : Disponible maintenant
 
-📖 **Documentation complète** : Voir [docs/MONETIZATION_PLAN.md](./docs/MONETIZATION_PLAN.md) et [docs/IMPLEMENTATION_GUIDE.md](./docs/IMPLEMENTATION_GUIDE.md)
+#### 🏢 Plan Enterprise
+- **Prix** : 250€/mois (sur devis)
+- **Limites** :
+  - Serveurs illimités
+  - Messages illimités
+  - Canaux illimités
+- **Fonctionnalités** :
+  - Toutes les fonctionnalités Business +
+  - AI chatbot custom
+  - White-label
+  - Onboarding dédié
+  - SLA 99.9%
+  - Success manager
+- **Disponibilité** : Sur demande
 
-### Implémentation
+### Intégration Stripe
 
-Le système de monétisation est prêt à être activé :
-1. Exécutez `supabase/schema_premium.sql` pour créer les tables
-2. Utilisez `src/utils/premium.js` pour gérer les plans et limites
-3. Intégrez Stripe pour les paiements (optionnel)
-4. Ajoutez les commandes `/ci-plan` et `/ci-upgrade`
+#### Configuration Stripe
 
-## 💰 Stratégie de monétisation
+1. Créer un compte sur https://stripe.com
+2. Obtenir les clés API (test ou production)
+3. Configurer les produits et prix :
+   - Pro : 25€/mois
+   - Business : 75€/mois
+   - Enterprise : 250€/mois
+4. Configurer le webhook :
+   - URL : `https://[votre-bot].onrender.com/webhook/stripe`
+   - Événements : checkout.session.completed, customer.subscription.updated, customer.subscription.deleted
+   - Secret : Copier le secret du webhook
 
-1. **Phase 1** : Service manuel (0€)
-   - Collectez les données automatiquement
-   - Analysez manuellement et envoyez des rapports
-   - Prix : 10-15€/mois pour valider le concept
+#### Webhooks Stripe
 
-2. **Phase 2** : Automatisation (avec revenus Phase 1)
-   - Intégrez Claude API (~30-50€/mois)
-   - Automatisez les rapports
-   - Prix : 15-30€/mois
+Le bot gère automatiquement :
+- **checkout.session.completed** : Activation de l'abonnement après paiement
+- **customer.subscription.updated** : Mise à jour du plan ou statut
+- **customer.subscription.deleted** : Annulation de l'abonnement
 
-3. **Phase 3** : Scale
-   - Ajoutez un dashboard web
-   - Fonctionnalités avancées
-   - Prix : 30-100€/mois selon les features
+#### Portail de Facturation
 
-## 🛠️ Stack technique
+Les utilisateurs peuvent accéder au portail Stripe via `/ci-billing` pour :
+- Voir les factures
+- Modifier le plan
+- Annuler l'abonnement
+- Mettre à jour le moyen de paiement
+
+📖 **Documentation complète** :
+- [docs/STRIPE_CONFIG_COMPLETE.md](./docs/STRIPE_CONFIG_COMPLETE.md) - Configuration Stripe
+- [docs/MONETIZATION_PLAN.md](./docs/MONETIZATION_PLAN.md) - Plan de monétisation
+
+## Dashboard Web
+
+### Fonctionnalités
+
+#### Authentification
+- **OAuth2 Discord** : Connexion sécurisée avec Discord
+- **Session Management** : Gestion automatique des sessions
+- **Multi-Serveurs** : Accès à tous les serveurs où le bot est actif
+
+#### Visualisation des Données
+- **Statistiques en Temps Réel** : Métriques mises à jour automatiquement
+- **Graphiques Interactifs** : Graphiques d'activité avec Recharts
+- **Top Membres** : Classement des membres les plus actifs
+- **Filtres Temporels** : 7 jours, 30 jours, 90 jours, tout
+- **Export CSV** : Téléchargement des données
+
+#### Fonctionnalités Premium
+- **Affichage du Plan** : Plan actuel et fonctionnalités disponibles
+- **Upgrade Direct** : Bouton pour passer à un plan premium
+- **Portail de Facturation** : Accès au portail Stripe
+
+### Pages Disponibles
+
+- **/** : Page de connexion
+- **/dashboard** : Dashboard principal avec statistiques
+- **/landing** : Landing page publique avec fonctionnalités et pricing
+- **/privacy** : Politique de confidentialité RGPD
+- **/terms** : Conditions d'utilisation
+- **/cgv** : Conditions générales de vente
+
+### Technologies
+
+- **Next.js 14** : Framework React avec App Router
+- **TypeScript** : Typage statique
+- **Tailwind CSS** : Styling utility-first
+- **Recharts** : Bibliothèque de graphiques
+- **Lucide React** : Icônes
+- **Supabase Auth** : Authentification Discord OAuth2
+
+## Conformité et Sécurité
+
+### RGPD
+
+Le service est conforme au Règlement Général sur la Protection des Données (RGPD) :
+
+- **Politique de Confidentialité** : Disponible sur `/privacy`
+- **Conditions d'Utilisation** : Disponible sur `/terms`
+- **CGV** : Disponible sur `/cgv`
+- **Droits des Utilisateurs** : Accès, rectification, effacement, portabilité
+- **Consentement** : Information claire avant collecte de données
+- **Sécurité** : Chiffrement des données en transit et au repos
+
+### Sécurité des Données
+
+- **Chiffrement** : HTTPS/TLS pour toutes les communications
+- **Base de Données** : Chiffrement au repos dans Supabase
+- **Paiements** : Stripe PCI-DSS niveau 1, aucune donnée bancaire stockée
+- **Authentification** : OAuth2 sécurisé pour Discord
+- **Accès** : Principe du moindre privilège
+
+### Hébergement
+
+- **Bot** : Render (conforme RGPD)
+- **Dashboard** : Vercel (conforme RGPD, SOC 2 Type II)
+- **Base de Données** : Supabase (conforme RGPD, SOC 2 Type II)
+- **Paiements** : Stripe (PCI-DSS niveau 1)
+
+## Documentation
+
+### Guides Disponibles
+
+- **[docs/GUIDE_COMPLET.md](./docs/GUIDE_COMPLET.md)** : Guide complet d'installation et configuration
+- **[docs/GAMIFICATION_SETUP.md](./docs/GAMIFICATION_SETUP.md)** : Configuration du système de gamification
+- **[docs/NEW_FEATURES_SETUP.md](./docs/NEW_FEATURES_SETUP.md)** : Configuration des nouvelles fonctionnalités
+- **[docs/STRIPE_CONFIG_COMPLETE.md](./docs/STRIPE_CONFIG_COMPLETE.md)** : Configuration complète Stripe
+- **[docs/MONETIZATION_PLAN.md](./docs/MONETIZATION_PLAN.md)** : Plan de monétisation détaillé
+- **[docs/IMPLEMENTATION_GUIDE.md](./docs/IMPLEMENTATION_GUIDE.md)** : Guide d'implémentation premium
+- **[dashboard/VERCEL_DEPLOY.md](./dashboard/VERCEL_DEPLOY.md)** : Déploiement dashboard Vercel
+- **[PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md)** : Structure complète du projet
+
+### Schémas SQL
+
+Tous les schémas SQL sont disponibles dans `supabase/` :
+- `schema.sql` : Schéma de base
+- `schema_gamification.sql` : Gamification
+- `schema_premium.sql` : Premium
+- `schema_stripe.sql` : Stripe
+- `schema_voice.sql` : Voice analytics
+- `schema_channel_counters.sql` : Channel counters
+
+## Stack Technique
 
 ### Bot Discord
-- **Node.js** + **discord.js** - Bot Discord
-- **Supabase** - Base de données PostgreSQL gratuite
-- **Render** - Hosting gratuit (recommandé)
-- **Groq API** - IA générative gratuite (recommandé)
-- **Alternatives** : OpenAI, Anthropic Claude, Hugging Face
+- **Runtime** : Node.js 18+
+- **Framework** : discord.js (latest)
+- **Base de Données** : Supabase (PostgreSQL)
+- **IA** : Groq API (gratuit), OpenAI, Anthropic Claude
+- **Paiements** : Stripe
+- **Hébergement** : Render (gratuit)
 
 ### Dashboard Web
-- **Next.js 14** - Framework React
-- **TypeScript** - Typage statique
-- **Tailwind CSS** - Styling
-- **Recharts** - Graphiques
-- **Vercel** - Hosting gratuit
-- **Supabase Auth** - Authentification Discord OAuth2
+- **Framework** : Next.js 14 (App Router)
+- **Language** : TypeScript
+- **Styling** : Tailwind CSS
+- **Graphiques** : Recharts
+- **Authentification** : Supabase Auth (Discord OAuth2)
+- **Hébergement** : Vercel (gratuit)
 
-## 📝 Notes
+### Infrastructure
+- **Base de Données** : Supabase (PostgreSQL)
+- **Authentification** : Supabase Auth
+- **Paiements** : Stripe
+- **CDN** : Vercel Edge Network
+- **Monitoring** : Render logs, Vercel analytics
 
-- Par défaut, le bot collecte uniquement les messages **après** son activation
-- Utilisez `/ci-sync-history` pour récupérer l'historique des messages passés
+## Commandes Complètes par Catégorie
+
+### 📊 Statistiques & Analytics
+- `/ci-stats` - Statistiques complètes du serveur
+- `/ci-weekly-summary` - Résumé hebdomadaire automatique
+- `/ci-sync-history` - Synchroniser l'historique des messages
+
+### 🤖 IA & Intelligence
+- `/ci-ai-summary` - Résumé intelligent généré par IA
+- `/ci-recommendations` - Recommandations d'engagement personnalisées
+- `/ci-sentiment` - Analyse de sentiment des messages
+- `/ci-predictions` - Prédictions et alertes proactives
+- `/ci-quest` - Quêtes personnalisées générées par IA
+
+### 🏆 Gamification
+- `/ci-xp` - Voir votre niveau XP et le leaderboard
+- `/ci-badges` - Voir vos badges et achievements
+
+### 🛡️ Sécurité & Modération
+- `/ci-bot-detection` - Détecter les bots et spam
+- `/ci-trust-score` - Score de confiance d'un membre
+
+### 📊 Fonctionnalités Avancées
+- `/ci-counter` - Gérer les compteurs de canaux
+- `/ci-voice-stats` - Statistiques de l'activité vocale
+- `/ci-mod-report` - Rapport de performance des modérateurs
+
+### 💳 Premium & Abonnement
+- `/ci-upgrade` - Passer à un plan premium
+- `/ci-billing` - Gérer votre abonnement
+- `/ci-plan` - Voir votre plan actuel
+- `/ci-help` - Afficher toutes les commandes disponibles
+
+## Limitations et Notes
+
+### Limitations Techniques
+
+- **Synchronisation Historique** : Maximum 100 messages par canal, 50 canaux par serveur
+- **Propagation des Commandes** : Jusqu'à 1 heure pour les commandes globales Discord
+- **Groq API** : 14,400 requêtes/jour en plan gratuit
+- **Render Free** : Service peut s'endormir après inactivité
+
+### Notes Importantes
+
+- Le bot collecte uniquement les messages **après** son activation par défaut
+- Utilisez `/ci-sync-history` pour récupérer l'historique
 - Les données sont stockées de manière sécurisée sur Supabase
 - Conforme aux règles de Discord (Message Content Intent requis)
+- Les commandes peuvent être utilisées même si elles n'apparaissent pas dans l'autocomplétion
 
-## 📜 Licence
+## Support et Contribution
+
+### Support
+
+- **Documentation** : Voir le dossier `docs/` pour guides détaillés
+- **Issues** : Ouvrir une issue sur GitHub pour signaler un problème
+- **Email** : support@community-intelligence.com (pour questions premium)
+
+### Contribution
+
+Les contributions sont les bienvenues ! Veuillez :
+1. Fork le projet
+2. Créer une branche pour votre fonctionnalité
+3. Commit vos changements
+4. Push vers la branche
+5. Ouvrir une Pull Request
+
+## Licence
 
 Ce projet est sous licence [MIT](LICENSE).
 
-## 🤝 Support
-
-Pour toute question, ouvrez une issue sur GitHub.
-
 ---
 
-**Bon lancement ! 🚀**
-
+**Community Intelligence Bot** - Analysez et développez votre communauté Discord avec l'IA 🚀
