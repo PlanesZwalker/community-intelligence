@@ -3,6 +3,7 @@ import { getStats } from '../utils/analytics.js';
 import { getWeeklySummary } from '../utils/weeklySummary.js';
 import { generateEngagementRecommendations } from '../utils/aiService.js';
 import { syncHistory } from '../utils/syncHistory.js';
+import { getOrCreateXPProfile, getLeaderboard, getUserRank, xpForNextLevel, calculateLevel } from '../utils/xpSystem.js';
 
 /**
  * Gère les commandes slash
@@ -277,6 +278,92 @@ export const commands = [
         } catch (replyError) {
           console.error('❌ Impossible d\'envoyer le message d\'erreur:', replyError);
         }
+      }
+    },
+  },
+  {
+    name: 'ci-xp',
+    description: 'Affiche votre niveau XP et le leaderboard du serveur',
+    execute: async (interaction, client) => {
+      await interaction.deferReply();
+
+      try {
+        const userId = interaction.user.id;
+        const guildId = interaction.guild.id;
+
+        // Récupérer le profil XP de l'utilisateur
+        const profile = await getOrCreateXPProfile(userId, guildId, client.supabase);
+        
+        if (!profile) {
+          return interaction.editReply({
+            content: '❌ Erreur lors de la récupération de votre profil XP.',
+          });
+        }
+
+        // Récupérer le leaderboard
+        const leaderboard = await getLeaderboard(guildId, client.supabase, 10);
+        const userRank = await getUserRank(userId, guildId, client.supabase);
+
+        // Calculer la progression vers le prochain niveau
+        const xpForNext = xpForNextLevel(profile.xp);
+        const currentLevel = calculateLevel(profile.xp);
+        const progressBarLength = 20;
+        const xpInCurrentLevel = profile.xp - (Math.pow(currentLevel - 1, 2) * 100);
+        const xpNeededForCurrentLevel = (Math.pow(currentLevel, 2) * 100) - (Math.pow(currentLevel - 1, 2) * 100);
+        const progressPercent = Math.min(100, (xpInCurrentLevel / xpNeededForCurrentLevel) * 100);
+        const filledBars = Math.floor((progressPercent / 100) * progressBarLength);
+        const progressBar = '█'.repeat(filledBars) + '░'.repeat(progressBarLength - filledBars);
+
+        // Formater le leaderboard
+        let leaderboardText = '';
+        if (leaderboard.length > 0) {
+          leaderboardText = leaderboard
+            .slice(0, 10)
+            .map((entry, index) => {
+              const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
+              const userMention = entry.user_id === userId ? `**<@${entry.user_id}>**` : `<@${entry.user_id}>`;
+              return `${medal} ${userMention} - Niveau ${entry.level} (${entry.xp} XP)`;
+            })
+            .join('\n');
+        } else {
+          leaderboardText = 'Aucun membre dans le leaderboard pour le moment.';
+        }
+
+        const embed = new EmbedBuilder()
+          .setTitle('🏆 Système de Gamification')
+          .setColor(0xFFD700)
+          .setDescription(`**Votre profil XP**`)
+          .addFields(
+            {
+              name: '📊 Votre niveau',
+              value: `**Niveau ${currentLevel}**\n${progressBar} ${Math.round(progressPercent)}%\n${xpInCurrentLevel}/${xpNeededForCurrentLevel} XP`,
+              inline: false,
+            },
+            {
+              name: '💎 Statistiques',
+              value: `**XP Total:** ${profile.xp} XP\n**Messages:** ${profile.total_messages || 0}\n**Questions répondues:** ${profile.questions_answered || 0}\n**Rang:** #${userRank || 'N/A'}`,
+              inline: false,
+            },
+            {
+              name: '🎯 Prochain niveau',
+              value: `${xpForNext} XP restants pour atteindre le niveau ${currentLevel + 1}`,
+              inline: false,
+            },
+            {
+              name: '🏅 Leaderboard (Top 10)',
+              value: leaderboardText.length > 1024 ? leaderboardText.substring(0, 1020) + '...' : leaderboardText,
+              inline: false,
+            }
+          )
+          .setTimestamp()
+          .setFooter({ text: 'Community Intelligence Bot - Gamification' });
+
+        await interaction.editReply({ embeds: [embed] });
+      } catch (error) {
+        console.error('Erreur dans /ci-xp:', error);
+        await interaction.editReply({
+          content: `❌ Erreur lors de la récupération des données XP: ${error.message}`,
+        });
       }
     },
   },

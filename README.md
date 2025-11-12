@@ -14,6 +14,7 @@ Bot Discord d'analyse de communauté avec IA générative - MVP gratuit pour dé
 - ✅ **Résumé IA intelligent** - Commande `/ci-ai-summary` avec Groq (gratuit)
 - ✅ **Détection de questions** - Identifie les questions posées
 - ✅ **Analytics de base** - Membres actifs, canaux populaires, etc.
+- 🏆 **Système de gamification** - XP/Levels avec leaderboard pour augmenter l'engagement (4x d'activité selon les études)
 
 ## 🚀 Installation
 
@@ -61,6 +62,21 @@ npm install
 
 📖 **Guide détaillé** : Voir la section [Création des tables Supabase](#création-des-tables-supabase) dans `docs/GUIDE_COMPLET.md`
 
+### 🏆 Système de Gamification (Nouveau !)
+
+Le bot inclut maintenant un système de gamification pour augmenter l'engagement :
+
+1. **Exécutez le schéma de gamification** :
+   - Allez dans Supabase > SQL Editor
+   - Copiez-collez le contenu de `supabase/schema_gamification.sql`
+   - Cliquez sur "Run"
+
+2. **Le système est automatiquement activé** après redéploiement du bot
+
+3. **Utilisez `/ci-xp`** pour voir votre niveau et le leaderboard
+
+📖 **Guide complet** : Voir `docs/GAMIFICATION_SETUP.md` pour la configuration avancée
+
 ### 4. Variables d'environnement
 
 Créez un fichier `.env` à la racine :
@@ -102,6 +118,7 @@ npm run dev
 - `/ci-ai-summary` - Résumé intelligent généré par IA (nécessite clé API)
 - `/ci-recommendations` - Recommandations d'engagement basées sur l'IA
 - `/ci-sync-history` - Synchronise l'historique des messages depuis Discord vers la base de données
+- `/ci-xp` - Affiche votre niveau XP et le leaderboard du serveur (🏆 Gamification)
 
 > **⏱️ Note importante** : Les commandes globales peuvent prendre jusqu'à **1 heure** pour apparaître dans Discord après l'enregistrement. Si les commandes n'apparaissent pas immédiatement, attendez quelques minutes ou utilisez-les directement en tapant `/ci-stats` même si elles n'apparaissent pas dans l'autocomplétion.
 
@@ -220,6 +237,34 @@ Une fois que vous avez des revenus, vous pouvez ajouter :
 - 👥 **Recommandations d'engagement** plus poussées
 - 🔔 **Notifications** dans le dashboard
 - 📤 **Export des données** (CSV, PDF)
+
+## 💰 Système de Monétisation (En Développement)
+
+Le bot supporte un système de plans premium pour monétiser vos fonctionnalités :
+
+### Plans Disponibles
+
+- **🆓 Free** : 10,000 messages, 10 canaux, fonctionnalités de base
+- **💎 Pro (15€/mois)** : Illimité, IA, exports, rapports automatiques
+- **🏢 Enterprise (50€/mois)** : Tout Pro + API REST, webhooks, support dédié
+
+### Fonctionnalités Premium
+
+- ✅ **Rapports automatiques** - Envoi automatique de résumés dans un canal
+- ✅ **Export de données** - CSV, JSON, PDF
+- ✅ **Analytics avancés** - Sentiment, tendances, prédictions
+- ✅ **API REST** - Intégrations personnalisées (Enterprise)
+- ✅ **Webhooks** - Notifications d'événements (Enterprise)
+
+📖 **Documentation complète** : Voir `docs/MONETIZATION_PLAN.md` et `docs/IMPLEMENTATION_GUIDE.md`
+
+### Implémentation
+
+Le système de monétisation est prêt à être activé :
+1. Exécutez `supabase/schema_premium.sql` pour créer les tables
+2. Utilisez `src/utils/premium.js` pour gérer les plans et limites
+3. Intégrez Stripe pour les paiements (optionnel)
+4. Ajoutez les commandes `/ci-plan` et `/ci-upgrade`
 
 ## 💰 Stratégie de monétisation
 
