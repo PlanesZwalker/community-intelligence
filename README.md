@@ -88,7 +88,7 @@ Le bot inclut maintenant un système de gamification pour augmenter l'engagement
 
 3. **Utilisez `/ci-xp`** pour voir votre niveau et le leaderboard
 
-📖 **Guide complet** : Voir `docs/GAMIFICATION_SETUP.md` pour la configuration avancée
+📖 **Guide complet** : Voir [docs/GAMIFICATION_SETUP.md](./docs/GAMIFICATION_SETUP.md) pour la configuration avancée
 
 ### 4. Variables d'environnement
 
@@ -108,7 +108,7 @@ NODE_ENV=production
 - **SUPABASE_URL** : Supabase > Settings > API > Project URL
 - **SUPABASE_KEY** : Supabase > Settings > API > anon public key
 
-📖 **Guide complet** : Voir la documentation dans `docs/` (local uniquement)
+📖 **Guide complet** : Voir [docs/GUIDE_COMPLET.md](./docs/GUIDE_COMPLET.md)
 
 💡 **Votre projet Supabase** : https://supabase.com/dashboard/project/twpznfiyatzuwkyfgudh
 
@@ -218,7 +218,7 @@ Le bot supporte plusieurs providers d'IA pour des fonctionnalités avancées :
    GROQ_API_KEY=votre_cle_groq
    ```
 
-📖 **Guide complet** : Voir la documentation dans le dossier `docs/` (local uniquement)
+📖 **Guide complet** : Voir [docs/GUIDE_COMPLET.md](./docs/GUIDE_COMPLET.md)
 
 ### Autres options
 
@@ -255,7 +255,7 @@ Voir la documentation dans le dossier `docs/` (local uniquement) pour les instru
 4. Ajoutez les variables d'environnement Supabase
 5. Déployez en 2 minutes !
 
-📖 **Guide complet** : Voir `dashboard/VERCEL_DEPLOY.md`
+📖 **Guide complet** : Voir [dashboard/VERCEL_DEPLOY.md](./dashboard/VERCEL_DEPLOY.md) ou [docs/VERCEL_DEPLOY_NOW.md](./docs/VERCEL_DEPLOY_NOW.md)
 
 ## 📈 Prochaines étapes
 
@@ -285,7 +285,7 @@ Le bot supporte un système de plans premium pour monétiser vos fonctionnalité
 - ✅ **API REST** - Intégrations personnalisées (Enterprise)
 - ✅ **Webhooks** - Notifications d'événements (Enterprise)
 
-📖 **Documentation complète** : Voir `docs/MONETIZATION_PLAN.md` et `docs/IMPLEMENTATION_GUIDE.md`
+📖 **Documentation complète** : Voir [docs/MONETIZATION_PLAN.md](./docs/MONETIZATION_PLAN.md) et [docs/IMPLEMENTATION_GUIDE.md](./docs/IMPLEMENTATION_GUIDE.md)
 
 ### Implémentation
 
