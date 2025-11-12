@@ -17,6 +17,9 @@ Bot Discord d'analyse de communauté avec IA générative - MVP gratuit pour dé
 - 🏆 **Système de gamification** - XP/Levels avec leaderboard pour augmenter l'engagement (4x d'activité selon les études)
 - 🤖 **Détection de bots/spam** - Identifie les comptes suspects et les patterns de spam
 - 🧠 **Résumé IA avancé** - Chunking intelligent pour analyser TOUS les messages (même des milliers)
+- 📊 **Channel Counters** - Compteurs visuels dans les canaux (membres, messages, en ligne)
+- 😊 **Analyse de sentiment** - Détection du sentiment des messages avec IA (positif/neutre/négatif)
+- 🎁 **Récompenses automatiques** - Attribution automatique de rôles basés sur le niveau XP
 
 ## 🚀 Installation
 
@@ -122,6 +125,8 @@ npm run dev
 - `/ci-sync-history` - Synchronise l'historique des messages depuis Discord vers la base de données
 - `/ci-xp` - Affiche votre niveau XP et le leaderboard du serveur (🏆 Gamification)
 - `/ci-bot-detection` - Détecte les bots et spam dans votre serveur (🤖 Anti-spam)
+- `/ci-counter` - Gère les compteurs visuels dans les canaux (📊 Channel Counters)
+- `/ci-sentiment` - Analyse le sentiment des messages (😊 Sentiment Analysis)
 
 > **⏱️ Note importante** : Les commandes globales peuvent prendre jusqu'à **1 heure** pour apparaître dans Discord après l'enregistrement. Si les commandes n'apparaissent pas immédiatement, attendez quelques minutes ou utilisez-les directement en tapant `/ci-stats` même si elles n'apparaissent pas dans l'autocomplétion.
 

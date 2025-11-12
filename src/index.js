@@ -110,6 +110,29 @@ client.once(Events.ClientReady, async (readyClient) => {
   } else {
     console.log('💡 Astuce: Utilisez /ci-sync-history pour synchroniser l\'historique manuellement');
   }
+
+  // Mettre à jour les channel counters toutes les 5 minutes
+  console.log('🔄 Système de mise à jour des channel counters activé (toutes les 5 minutes)');
+  setInterval(async () => {
+    try {
+      for (const [guildId, guild] of readyClient.guilds.cache) {
+        await updateAllChannelCounters(guild, supabase);
+      }
+    } catch (error) {
+      console.error('❌ Erreur mise à jour channel counters:', error);
+    }
+  }, 5 * 60 * 1000); // 5 minutes
+
+  // Mettre à jour immédiatement au démarrage (après 30 secondes)
+  setTimeout(async () => {
+    try {
+      for (const [guildId, guild] of readyClient.guilds.cache) {
+        await updateAllChannelCounters(guild, supabase);
+      }
+    } catch (error) {
+      console.error('❌ Erreur mise à jour initiale channel counters:', error);
+    }
+  }, 30000); // 30 secondes après le démarrage
 });
 
 // Gérer les messages
