@@ -17,6 +17,68 @@ import { getGuildPlan, hasFeature, checkLimit, getLimitErrorMessage } from '../u
 import { hasAIConsent, giveAIConsent, revokeAIConsent, getAIConsentInfo, getAIConsentWarningMessage } from '../utils/aiConsent.js';
 
 /**
+ * Helper pour répondre à une interaction de manière sécurisée
+ */
+async function safeReply(interaction, content, options = {}) {
+  try {
+    if (!interaction.isRepliable()) {
+      console.warn('⚠️ Interaction non répondable');
+      return false;
+    }
+
+    if (interaction.replied) {
+      // Déjà répondue, utiliser followUp
+      await interaction.followUp({ content, ...options });
+      return true;
+    } else if (interaction.deferred) {
+      // Déjà différée, utiliser editReply
+      await interaction.editReply({ content, ...options });
+      return true;
+    } else {
+      // Première réponse
+      await interaction.reply({ content, ...options });
+      return true;
+    }
+  } catch (error) {
+    console.error('❌ Erreur lors de la réponse:', error);
+    return false;
+  }
+}
+
+/**
+ * Helper pour différer une réponse de manière sécurisée
+ */
+async function safeDeferReply(interaction, options = {}) {
+  try {
+    if (!interaction.isRepliable()) {
+      console.warn('⚠️ Interaction non répondable');
+      return false;
+    }
+
+    if (interaction.replied || interaction.deferred) {
+      // Déjà répondue ou différée
+      return true;
+    }
+
+    await interaction.deferReply(options);
+    return true;
+  } catch (error) {
+    console.error('❌ Erreur lors de la réponse différée:', error);
+    // Essayer de répondre directement si defer échoue
+    try {
+      await interaction.reply({
+        content: '⏳ Traitement en cours...',
+        ephemeral: options.ephemeral || false,
+      });
+      return true;
+    } catch (replyError) {
+      console.error('❌ Impossible de répondre:', replyError);
+      return false;
+    }
+  }
+}
+
+/**
  * Gère les commandes slash
  */
 export async function commandHandler(interaction, client) {
@@ -34,43 +96,52 @@ export async function commandHandler(interaction, client) {
   if (!command) {
     console.warn(`⚠️ Commande non trouvée: ${interaction.commandName}`);
     console.warn(`   Commandes enregistrées: ${Array.from(client.commands.keys()).join(', ')}`);
-    if (interaction.isRepliable()) {
-      return interaction.reply({
-        content: '❌ Commande non trouvée',
-        ephemeral: true,
-      }).catch(err => console.error('Erreur lors de la réponse:', err));
-    }
+    await safeReply(interaction, '❌ Commande non trouvée. Utilisez `/ci-help` pour voir toutes les commandes disponibles.', { ephemeral: true });
     return;
   }
 
   console.log(`✅ Commande trouvée, exécution...`);
 
-  try {
-    await command.execute(interaction, client);
-    console.log(`✅ Commande /${interaction.commandName} exécutée avec succès`);
-  } catch (error) {
-    console.error(`❌ Erreur lors de l'exécution de ${interaction.commandName}:`, error);
-    
-    // Vérifier que l'interaction peut encore répondre
-    if (!interaction.isRepliable()) {
-      console.error('❌ Interaction ne peut plus répondre');
-      return;
-    }
+  // Timeout pour garantir une réponse dans les 3 secondes
+  const timeoutPromise = new Promise((resolve) => {
+    setTimeout(() => {
+      resolve('timeout');
+    }, 2500); // 2.5 secondes pour laisser le temps
+  });
 
-    const errorMessage = {
-      content: '❌ Une erreur est survenue lors de l\'exécution de cette commande.',
-      ephemeral: true,
-    };
-
+  const executionPromise = (async () => {
     try {
-      if (interaction.replied || interaction.deferred) {
-        await interaction.followUp(errorMessage);
-      } else {
-        await interaction.reply(errorMessage);
-      }
-    } catch (replyError) {
-      console.error('❌ Impossible d\'envoyer le message d\'erreur:', replyError);
+      await command.execute(interaction, client);
+      console.log(`✅ Commande /${interaction.commandName} exécutée avec succès`);
+      return 'success';
+    } catch (error) {
+      console.error(`❌ Erreur lors de l'exécution de ${interaction.commandName}:`, error);
+      console.error('   Stack:', error.stack);
+      return { error };
     }
+  })();
+
+  // Attendre soit le timeout soit l'exécution
+  const result = await Promise.race([executionPromise, timeoutPromise]);
+
+  // Si timeout, différer la réponse pour éviter l'expiration
+  if (result === 'timeout') {
+    console.warn(`⏱️ Commande /${interaction.commandName} prend du temps, réponse différée...`);
+    await safeDeferReply(interaction, { ephemeral: false });
+    // Attendre la fin de l'exécution
+    const finalResult = await executionPromise;
+    if (finalResult && finalResult.error) {
+      await safeReply(interaction, `❌ Erreur: ${finalResult.error.message}\n\n💡 Vérifiez les logs pour plus de détails.`, { ephemeral: true });
+    }
+    return;
+  }
+
+  // Si erreur lors de l'exécution
+  if (result && result.error) {
+    const error = result.error;
+    const errorMessage = `❌ Une erreur est survenue lors de l'exécution de cette commande.\n\n**Erreur:** ${error.message}\n\n💡 Vérifiez les logs pour plus de détails.`;
+    
+    await safeReply(interaction, errorMessage, { ephemeral: true });
   }
 }
 
@@ -80,59 +151,69 @@ export const commands = [
     name: 'ci-stats',
     description: 'Affiche les statistiques de votre serveur (Community Intelligence)',
     execute: async (interaction, client) => {
-      await interaction.deferReply();
+      try {
+        await interaction.deferReply();
 
-      const stats = await getStats(interaction.guild.id, client.supabase);
+        const stats = await getStats(interaction.guild.id, client.supabase);
 
-      const embed = new EmbedBuilder()
-        .setTitle('📊 Statistiques du serveur')
-        .setColor(0x5865F2)
-        .addFields(
-          { name: '💬 Messages totaux', value: stats.totalMessages.toString(), inline: true },
-          { name: '👥 Membres actifs', value: stats.activeMembers.toString(), inline: true },
-          { name: '📝 Canaux actifs', value: stats.activeChannels.toString(), inline: true },
-          { name: '❓ Questions posées', value: stats.totalQuestions.toString(), inline: true },
-          { name: '💭 Taux de réponse', value: `${stats.answerRate}%`, inline: true },
-          { name: '🔥 Messages populaires', value: stats.popularMessages.toString(), inline: true }
-        )
-        .setTimestamp()
-        .setFooter({ text: 'Community Intelligence Bot' });
+        const embed = new EmbedBuilder()
+          .setTitle('📊 Statistiques du serveur')
+          .setColor(0x5865F2)
+          .addFields(
+            { name: '💬 Messages totaux', value: stats.totalMessages.toString(), inline: true },
+            { name: '👥 Membres actifs', value: stats.activeMembers.toString(), inline: true },
+            { name: '📝 Canaux actifs', value: stats.activeChannels.toString(), inline: true },
+            { name: '❓ Questions posées', value: stats.totalQuestions.toString(), inline: true },
+            { name: '💭 Taux de réponse', value: `${stats.answerRate}%`, inline: true },
+            { name: '🔥 Messages populaires', value: stats.popularMessages.toString(), inline: true }
+          )
+          .setTimestamp()
+          .setFooter({ text: 'Community Intelligence Bot' });
 
-      await interaction.editReply({ embeds: [embed] });
+        await interaction.editReply({ embeds: [embed] });
+      } catch (error) {
+        console.error('Erreur dans /ci-stats:', error);
+        throw error; // Laisser le handler principal gérer
+      }
     },
   },
   {
     name: 'ci-weekly-summary',
     description: 'Génère un résumé hebdomadaire de l\'activité (Community Intelligence)',
     execute: async (interaction, client) => {
-      await interaction.deferReply();
+      try {
+        await interaction.deferReply();
 
-      // Utilise l'IA si disponible
-      const useAI = !!process.env.GROQ_API_KEY;
-      const summary = await getWeeklySummary(interaction.guild.id, client.supabase, useAI);
+        // Utilise l'IA si disponible
+        const useAI = !!process.env.GROQ_API_KEY;
+        const summary = await getWeeklySummary(interaction.guild.id, client.supabase, useAI);
 
-      const embed = new EmbedBuilder()
-        .setTitle('📅 Résumé hebdomadaire')
-        .setColor(0x57F287)
-        .setDescription(summary.description)
-        .addFields(
-          { name: '🏆 Top 3 membres actifs', value: summary.topMembers, inline: false },
-          { name: '📢 Canaux les plus actifs', value: summary.topChannels, inline: false },
-          { name: '❓ Questions sans réponse', value: summary.unansweredQuestions || 'Aucune', inline: false }
-        )
-        .setTimestamp()
-        .setFooter({ text: 'Community Intelligence Bot' });
+        const embed = new EmbedBuilder()
+          .setTitle('📅 Résumé hebdomadaire')
+          .setColor(0x57F287)
+          .setDescription(summary.description)
+          .addFields(
+            { name: '🏆 Top 3 membres actifs', value: summary.topMembers, inline: false },
+            { name: '📢 Canaux les plus actifs', value: summary.topChannels, inline: false },
+            { name: '❓ Questions sans réponse', value: summary.unansweredQuestions || 'Aucune', inline: false }
+          )
+          .setTimestamp()
+          .setFooter({ text: 'Community Intelligence Bot' });
 
-      // Ajouter le résumé IA si disponible
-      if (summary.aiSummary) {
-        embed.addFields({
-          name: '🤖 Analyse IA',
-          value: summary.aiSummary.substring(0, 1024), // Limite Discord
-          inline: false,
-        });
+        // Ajouter le résumé IA si disponible
+        if (summary.aiSummary) {
+          embed.addFields({
+            name: '🤖 Analyse IA',
+            value: summary.aiSummary.substring(0, 1024), // Limite Discord
+            inline: false,
+          });
+        }
+
+        await interaction.editReply({ embeds: [embed] });
+      } catch (error) {
+        console.error('Erreur dans /ci-weekly-summary:', error);
+        throw error;
       }
-
-      await interaction.editReply({ embeds: [embed] });
     },
   },
   {
@@ -231,36 +312,41 @@ export const commands = [
     name: 'ci-recommendations',
     description: 'Obtient des recommandations d\'engagement basées sur l\'IA',
     execute: async (interaction, client) => {
-      await interaction.deferReply();
+      try {
+        await interaction.deferReply();
 
-      // Vérifier le consentement IA (RGPD)
-      const consentGiven = await hasAIConsent(interaction.guild.id, client.supabase);
-      if (!consentGiven) {
-        return interaction.editReply({
-          content: getAIConsentWarningMessage(),
-        });
+        // Vérifier le consentement IA (RGPD)
+        const consentGiven = await hasAIConsent(interaction.guild.id, client.supabase);
+        if (!consentGiven) {
+          return interaction.editReply({
+            content: getAIConsentWarningMessage(),
+          });
+        }
+
+        if (!process.env.GROQ_API_KEY && !process.env.OPENAI_API_KEY && !process.env.ANTHROPIC_API_KEY) {
+          return interaction.editReply({
+            content: '❌ Aucune clé API IA configurée. Ajoutez `GROQ_API_KEY` dans vos variables d\'environnement.\n💡 Groq est gratuit : https://console.groq.com',
+          });
+        }
+
+        const stats = await getStats(interaction.guild.id, client.supabase);
+        const recommendations = await generateEngagementRecommendations(stats, process.env.AI_PROVIDER || 'groq');
+
+        const embed = new EmbedBuilder()
+          .setTitle('💡 Recommandations d\'engagement')
+          .setColor(0xFEE75C)
+          .setDescription(recommendations.map((rec, i) => `${i + 1}. ${rec}`).join('\n\n'))
+          .addFields(
+            { name: '📊 Contexte', value: `${stats.activeMembers} membres actifs | ${stats.totalQuestions} questions`, inline: false }
+          )
+          .setTimestamp()
+          .setFooter({ text: 'Community Intelligence Bot - Powered by AI' });
+
+        await interaction.editReply({ embeds: [embed] });
+      } catch (error) {
+        console.error('Erreur dans /ci-recommendations:', error);
+        throw error;
       }
-
-      if (!process.env.GROQ_API_KEY && !process.env.OPENAI_API_KEY && !process.env.ANTHROPIC_API_KEY) {
-        return interaction.editReply({
-          content: '❌ Aucune clé API IA configurée. Ajoutez `GROQ_API_KEY` dans vos variables d\'environnement.\n💡 Groq est gratuit : https://console.groq.com',
-        });
-      }
-
-      const stats = await getStats(interaction.guild.id, client.supabase);
-      const recommendations = await generateEngagementRecommendations(stats, process.env.AI_PROVIDER || 'groq');
-
-      const embed = new EmbedBuilder()
-        .setTitle('💡 Recommandations d\'engagement')
-        .setColor(0xFEE75C)
-        .setDescription(recommendations.map((rec, i) => `${i + 1}. ${rec}`).join('\n\n'))
-        .addFields(
-          { name: '📊 Contexte', value: `${stats.activeMembers} membres actifs | ${stats.totalQuestions} questions`, inline: false }
-        )
-        .setTimestamp()
-        .setFooter({ text: 'Community Intelligence Bot - Powered by AI' });
-
-      await interaction.editReply({ embeds: [embed] });
     },
   },
   {
