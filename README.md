@@ -23,6 +23,10 @@ Bot Discord d'analyse de communauté avec IA générative - MVP gratuit pour dé
 - 🔮 **Prédictions proactives** - Alertes et prédictions basées sur les tendances (game-changer)
 - 🎯 **Quêtes personnalisées** - Quêtes quotidiennes générées par IA pour chaque membre (4x engagement)
 - 📊 **Mod Performance** - Suivi de la performance des modérateurs avec métriques détaillées
+- 🎤 **Voice Analytics** - Tracking complet de l'activité vocale (temps, canaux, heures de pic)
+- 🛡️ **Score de confiance** - Détection avancée de spam avec score 0-100 par membre
+- 🏆 **Badges visuels** - Système d'achievements avec badges débloquables
+- 👋 **Onboarding intelligent** - Accueil automatique personnalisé avec suggestions de rôles/canaux
 
 ## 🚀 Installation
 
