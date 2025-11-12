@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { 
   BarChart3, 
   Brain, 
@@ -18,7 +19,9 @@ import {
 } from 'lucide-react'
 
 export default function LandingPage() {
+  const router = useRouter()
   const [hoveredPlan, setHoveredPlan] = useState<string | null>(null)
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
 
   const features = [
     {
@@ -268,16 +271,71 @@ export default function LandingPage() {
                   </li>
                 ))}
               </ul>
-              <Link
-                href={plan.name === 'Enterprise' ? 'mailto:support@community-intelligence.com' : '/dashboard'}
-                className={`block w-full text-center py-3 rounded-lg font-semibold transition-colors ${
-                  plan.popular
-                    ? 'bg-blue-600 hover:bg-blue-700'
-                    : 'bg-gray-700 hover:bg-gray-600'
-                }`}
-              >
-                {plan.cta}
-              </Link>
+              {plan.name === 'Gratuit' ? (
+                <Link
+                  href="/dashboard"
+                  className={`block w-full text-center py-3 rounded-lg font-semibold transition-colors ${
+                    plan.popular
+                      ? 'bg-blue-600 hover:bg-blue-700'
+                      : 'bg-gray-700 hover:bg-gray-600'
+                  }`}
+                >
+                  {plan.cta}
+                </Link>
+              ) : plan.name === 'Enterprise' ? (
+                <a
+                  href="mailto:support@community-intelligence.com"
+                  className={`block w-full text-center py-3 rounded-lg font-semibold transition-colors ${
+                    plan.popular
+                      ? 'bg-blue-600 hover:bg-blue-700'
+                      : 'bg-gray-700 hover:bg-gray-600'
+                  }`}
+                >
+                  {plan.cta}
+                </a>
+              ) : (
+                <button
+                  onClick={async () => {
+                    setLoadingPlan(plan.name.toLowerCase())
+                    // Demander le guildId à l'utilisateur
+                    const guildId = prompt('Entrez l\'ID de votre serveur Discord (guild_id):\n\n💡 Pour trouver l\'ID :\n1. Activez le mode développeur dans Discord\n2. Clic droit sur votre serveur > Copier l\'ID du serveur')
+                    if (!guildId) {
+                      setLoadingPlan(null)
+                      return
+                    }
+
+                    try {
+                      const response = await fetch('/api/stripe/checkout', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          planType: plan.name.toLowerCase(),
+                          guildId: guildId.trim(),
+                        }),
+                      })
+
+                      const data = await response.json()
+                      if (data.url) {
+                        window.location.href = data.url
+                      } else {
+                        alert('Erreur: ' + (data.error || 'Impossible de créer la session'))
+                        setLoadingPlan(null)
+                      }
+                    } catch (error) {
+                      alert('Erreur lors de la création du lien de paiement')
+                      setLoadingPlan(null)
+                    }
+                  }}
+                  disabled={loadingPlan === plan.name.toLowerCase()}
+                  className={`block w-full text-center py-3 rounded-lg font-semibold transition-colors ${
+                    plan.popular
+                      ? 'bg-blue-600 hover:bg-blue-700'
+                      : 'bg-gray-700 hover:bg-gray-600'
+                  } ${loadingPlan === plan.name.toLowerCase() ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  {loadingPlan === plan.name.toLowerCase() ? 'Chargement...' : plan.cta}
+                </button>
+              )}
             </div>
           ))}
         </div>

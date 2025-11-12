@@ -48,7 +48,26 @@ export default function Dashboard() {
 
   useEffect(() => {
     checkUser()
-  }, [])
+    
+    // Vérifier si c'est un retour de paiement Stripe
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search)
+      const success = urlParams.get('success')
+      const canceled = urlParams.get('canceled')
+      if (success === 'true') {
+        setPaymentSuccess(true)
+        // Recharger le plan après quelques secondes
+        setTimeout(() => {
+          if (selectedGuild) {
+            loadGuildPlan(selectedGuild)
+          }
+        }, 3000)
+      }
+      if (canceled === 'true') {
+        // L'utilisateur a annulé, rien à faire
+      }
+    }
+  }, [selectedGuild])
 
   useEffect(() => {
     if (selectedGuild) {
@@ -334,12 +353,69 @@ export default function Dashboard() {
             <div className="mt-8 p-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg">
               <h3 className="text-white font-semibold mb-2">💎 Passez à Pro</h3>
               <p className="text-blue-100 text-sm mb-3">Débloquez toutes les fonctionnalités premium</p>
-              <Link
-                href="/landing"
+              <button
+                onClick={async () => {
+                  if (!selectedGuild) {
+                    alert('Veuillez sélectionner un serveur d\'abord')
+                    return
+                  }
+                  try {
+                    const response = await fetch('/api/stripe/checkout', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        planType: 'pro',
+                        guildId: selectedGuild,
+                        userId: user?.id,
+                      }),
+                    })
+                    const data = await response.json()
+                    if (data.url) {
+                      window.location.href = data.url
+                    } else {
+                      alert('Erreur: ' + (data.error || 'Impossible de créer la session'))
+                    }
+                  } catch (error) {
+                    alert('Erreur lors de la création du lien de paiement')
+                  }
+                }}
                 className="block w-full text-center py-2 bg-white text-blue-600 rounded-lg font-semibold text-sm hover:bg-gray-100 transition-colors"
               >
-                Voir les plans
-              </Link>
+                Passer à Pro (25€/mois)
+              </button>
+            </div>
+          )}
+          
+          {guildPlan && guildPlan.plan_type !== 'free' && guildPlan.stripe_customer_id && (
+            <div className="mt-8 p-4 bg-gray-700/50 rounded-lg">
+              <h3 className="text-white font-semibold mb-2">💳 Gérer l'abonnement</h3>
+              <p className="text-gray-300 text-sm mb-3">Plan actuel: {guildPlan.plan_type.toUpperCase()}</p>
+              <button
+                onClick={async () => {
+                  if (!selectedGuild) return
+                  try {
+                    const response = await fetch('/api/stripe/billing', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        guildId: selectedGuild,
+                        userId: user?.id,
+                      }),
+                    })
+                    const data = await response.json()
+                    if (data.url) {
+                      window.location.href = data.url
+                    } else {
+                      alert('Erreur: ' + (data.error || 'Impossible d\'accéder au portail'))
+                    }
+                  } catch (error) {
+                    alert('Erreur lors de l\'accès au portail de facturation')
+                  }
+                }}
+                className="block w-full text-center py-2 bg-gray-600 hover:bg-gray-500 text-white rounded-lg font-semibold text-sm transition-colors"
+              >
+                Ouvrir le portail de facturation
+              </button>
             </div>
           )}
         </aside>
