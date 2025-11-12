@@ -4,6 +4,7 @@ import { getWeeklySummary } from '../utils/weeklySummary.js';
 import { generateEngagementRecommendations } from '../utils/aiService.js';
 import { syncHistory } from '../utils/syncHistory.js';
 import { getOrCreateXPProfile, getLeaderboard, getUserRank, xpForNextLevel, calculateLevel } from '../utils/xpSystem.js';
+import { getBotDetectionStats, analyzeChannelSpam, detectActivitySpike } from '../utils/botDetection.js';
 
 /**
  * Gère les commandes slash
@@ -363,6 +364,78 @@ export const commands = [
         console.error('Erreur dans /ci-xp:', error);
         await interaction.editReply({
           content: `❌ Erreur lors de la récupération des données XP: ${error.message}`,
+        });
+      }
+    },
+  },
+  {
+    name: 'ci-bot-detection',
+    description: 'Affiche les statistiques de détection de bots et spam',
+    execute: async (interaction, client) => {
+      await interaction.deferReply();
+
+      try {
+        const guildId = interaction.guild.id;
+        const channelId = interaction.channel.id;
+
+        // Récupérer les stats générales
+        const botStats = await getBotDetectionStats(guildId, client.supabase);
+        
+        // Analyser le canal actuel
+        const channelSpam = await analyzeChannelSpam(guildId, channelId, client.supabase, 24);
+        
+        // Détecter les spikes d'activité
+        const activitySpike = await detectActivitySpike(guildId, client.supabase, 1);
+
+        // Formater les utilisateurs suspects du canal
+        let suspiciousUsersText = 'Aucun utilisateur suspect détecté';
+        if (channelSpam.suspiciousUsers.length > 0) {
+          suspiciousUsersText = channelSpam.suspiciousUsers
+            .slice(0, 5)
+            .map((user, index) => {
+              return `${index + 1}. <@${user.author_id}> - ${user.message_count} messages (${user.repetition_rate}% répétition)`;
+            })
+            .join('\n');
+        }
+
+        const embed = new EmbedBuilder()
+          .setTitle('🤖 Détection de Bots et Spam')
+          .setColor(0xFF6B6B)
+          .addFields(
+            {
+              name: '📊 Statistiques Générales',
+              value: `**Utilisateurs totaux:** ${botStats.totalUsers}\n**Utilisateurs suspects:** ${botStats.suspiciousUsers}\n**Taux de spam:** ${botStats.spamRate}%\n**Comptes récents:** ${botStats.recentAccounts}`,
+              inline: false,
+            },
+            {
+              name: '📝 Canal Actuel',
+              value: `**Messages (24h):** ${channelSpam.totalMessages}\n**Taux de spam:** ${channelSpam.spamRate}%\n**Utilisateurs suspects:** ${channelSpam.suspiciousUsers.length}`,
+              inline: false,
+            },
+            {
+              name: '⚠️ Utilisateurs Suspects (Top 5)',
+              value: suspiciousUsersText.length > 1024 ? suspiciousUsersText.substring(0, 1020) + '...' : suspiciousUsersText,
+              inline: false,
+            }
+          )
+          .setTimestamp()
+          .setFooter({ text: 'Community Intelligence Bot - Bot Detection' });
+
+        // Ajouter une alerte si spike détecté
+        if (activitySpike.isSpike) {
+          embed.addFields({
+            name: '🚨 Alerte: Spike d\'Activité',
+            value: `**Augmentation:** +${activitySpike.increase}%\n**Messages (1h):** ${activitySpike.currentMessages} (vs ${activitySpike.previousMessages} précédemment)\n⚠️ Possible spam ou raid`,
+            inline: false,
+          });
+          embed.setColor(0xFF0000); // Rouge pour alerte
+        }
+
+        await interaction.editReply({ embeds: [embed] });
+      } catch (error) {
+        console.error('Erreur dans /ci-bot-detection:', error);
+        await interaction.editReply({
+          content: `❌ Erreur lors de la détection de bots: ${error.message}`,
         });
       }
     },
