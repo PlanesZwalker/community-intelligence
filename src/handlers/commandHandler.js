@@ -1184,8 +1184,17 @@ export const commands = [
         const userId = interaction.user.id;
 
         console.log(`   Plan demandé: ${planType}`);
+        console.log(`   Options disponibles:`, interaction.options.data);
         console.log(`   Guild ID: ${guildId}`);
         console.log(`   User ID: ${userId}`);
+
+        // Vérifier que le plan est fourni
+        if (!planType) {
+          console.error('❌ Plan non fourni dans les options');
+          return interaction.editReply({
+            content: `❌ **Plan non spécifié**\n\nVeuillez sélectionner un plan :\n- \`/ci-upgrade plan:pro\` pour Pro (25€/mois)\n- \`/ci-upgrade plan:business\` pour Business (75€/mois)\n- \`/ci-upgrade plan:enterprise\` pour Enterprise (250€/mois)`,
+          });
+        }
 
         // Vérifier que Stripe est configuré
         if (!process.env.STRIPE_SECRET_KEY) {

@@ -29,10 +29,16 @@ export async function createCheckoutSession(guildId, planType, userId, supabase)
     enterprise: 'Enterprise',
   };
 
+  console.log(`   Plan type reçu: ${planType}`);
+  console.log(`   Plans disponibles:`, Object.keys(planPrices));
+  
   const priceId = planPrices[planType];
   if (!priceId) {
-    throw new Error(`Plan ${planType} invalide`);
+    console.error(`   ❌ Plan invalide: ${planType}`);
+    throw new Error(`Plan "${planType}" invalide. Plans disponibles: ${Object.keys(planPrices).join(', ')}`);
   }
+  
+  console.log(`   ✅ Plan valide, prix: ${priceId} centimes (${priceId / 100}€)`);
 
   // Créer ou récupérer le customer Stripe
   console.log('   🔄 Récupération du customer Stripe...');
