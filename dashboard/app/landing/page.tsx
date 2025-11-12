@@ -464,24 +464,32 @@ export default function LandingPage() {
                     <div>
                       <h4 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
                         <MessageSquare className="w-5 h-5 text-purple-400" />
-                        Commandes Discord
+                        Commandes Discord Disponibles
                       </h4>
+                      <p className="text-gray-400 text-xs mb-3">
+                        Utilisez ces commandes directement dans Discord pour accéder à cette fonctionnalité :
+                      </p>
                       <div className="space-y-2">
                         {feature.details.commands.map((cmd, idx) => {
                           const [commandName, description] = cmd.split(' - ');
                           return (
-                            <div key={idx} className="bg-gray-700/50 rounded-lg p-3 text-sm hover:bg-gray-700 transition-colors">
-                              <div className="flex items-start gap-2">
-                                <code className="text-blue-400 font-mono font-semibold flex-shrink-0">{commandName}</code>
-                                <span className="text-gray-300 flex-1">{description}</span>
+                            <div key={idx} className="bg-gray-700/50 rounded-lg p-3 text-sm hover:bg-gray-700 transition-colors border border-gray-600/50">
+                              <div className="flex flex-col sm:flex-row sm:items-start gap-2">
+                                <code className="text-blue-400 font-mono font-semibold flex-shrink-0 bg-blue-500/10 px-2 py-1 rounded">
+                                  {commandName}
+                                </code>
+                                <span className="text-gray-300 flex-1 text-xs sm:text-sm">{description}</span>
                               </div>
                             </div>
                           );
                         })}
                       </div>
-                      <div className="mt-3 p-3 bg-blue-600/10 border border-blue-500/20 rounded-lg">
-                        <p className="text-blue-300 text-xs">
-                          💡 <strong>Astuce :</strong> Tapez ces commandes directement dans Discord pour utiliser cette fonctionnalité !
+                      <div className="mt-4 p-3 bg-gradient-to-r from-blue-600/10 to-purple-600/10 border border-blue-500/30 rounded-lg">
+                        <p className="text-blue-300 text-xs flex items-start gap-2">
+                          <span className="text-lg">💡</span>
+                          <span>
+                            <strong className="text-white">Astuce :</strong> Tapez <code className="bg-gray-800/50 px-1.5 py-0.5 rounded text-blue-400 font-mono text-xs">/ci-help</code> dans Discord pour voir toutes les commandes disponibles !
+                          </span>
                         </p>
                       </div>
                     </div>
