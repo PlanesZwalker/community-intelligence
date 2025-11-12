@@ -193,9 +193,20 @@ export default function Home() {
           Se connecter avec Discord
         </button>
 
-        <p className="text-xs text-gray-500 text-center mt-6">
-          En vous connectant, vous autorisez l'accès à vos serveurs Discord
-        </p>
+        <div className="mt-6 space-y-3">
+          <p className="text-xs text-gray-500 text-center">
+            En vous connectant, vous autorisez l'accès à vos serveurs Discord
+          </p>
+          <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3">
+            <p className="text-xs text-blue-300 leading-relaxed">
+              <strong className="text-blue-200">🛡️ Protection des données :</strong> Nous collectons uniquement les données nécessaires au fonctionnement du service. 
+              Vos données sont protégées conformément au RGPD. 
+              <Link href="/privacy" className="text-blue-400 hover:text-blue-300 underline ml-1">
+                En savoir plus
+              </Link>
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   )
