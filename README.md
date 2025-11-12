@@ -27,6 +27,7 @@ Bot Discord d'analyse de communauté avec IA générative - MVP gratuit pour dé
 - 🛡️ **Score de confiance** - Détection avancée de spam avec score 0-100 par membre
 - 🏆 **Badges visuels** - Système d'achievements avec badges débloquables
 - 👋 **Onboarding intelligent** - Accueil automatique personnalisé avec suggestions de rôles/canaux
+- 💳 **Intégration Stripe** - Paiements sécurisés avec checkout et portail de facturation
 
 ## 🚀 Installation
 
@@ -140,6 +141,9 @@ npm run dev
 - `/ci-voice-stats` - 🎤 Statistiques de l'activité vocale du serveur
 - `/ci-trust-score` - 🛡️ Score de confiance d'un membre (détection spam avancée)
 - `/ci-badges` - 🏆 Badges et achievements visuels
+- `/ci-upgrade` - 💳 Passer à un plan premium (Stripe)
+- `/ci-billing` - 💳 Gérer votre abonnement et factures
+- `/ci-plan` - 📊 Affiche votre plan actuel et les fonctionnalités disponibles
 
 > **⏱️ Note importante** : Les commandes globales peuvent prendre jusqu'à **1 heure** pour apparaître dans Discord après l'enregistrement. Si les commandes n'apparaissent pas immédiatement, attendez quelques minutes ou utilisez-les directement en tapant `/ci-stats` même si elles n'apparaissent pas dans l'autocomplétion.
 
