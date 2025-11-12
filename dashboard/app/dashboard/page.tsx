@@ -45,6 +45,7 @@ export default function Dashboard() {
   const [period, setPeriod] = useState<'7' | '30' | '90' | 'all'>('7')
   const [activeTab, setActiveTab] = useState<'overview' | 'members' | 'channels' | 'analytics'>('overview')
   const [guildPlan, setGuildPlan] = useState<any>(null)
+  const [paymentSuccess, setPaymentSuccess] = useState(false)
 
   useEffect(() => {
     checkUser()
