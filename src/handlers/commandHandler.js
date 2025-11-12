@@ -13,7 +13,7 @@ import { getVoiceStats } from '../utils/voiceAnalytics.js';
 import { calculateTrustScore } from '../utils/botDetection.js';
 import { getUserBadges } from '../utils/badges.js';
 import { createCheckoutSession, createBillingPortal } from '../utils/stripe.js';
-import { getGuildPlan } from '../utils/premium.js';
+import { getGuildPlan, hasFeature, checkLimit, getLimitErrorMessage } from '../utils/premium.js';
 
 /**
  * Gère les commandes slash
@@ -141,6 +141,16 @@ export const commands = [
       console.log('🤖 Commande /ci-ai-summary exécutée');
       console.log(`   Serveur: ${interaction.guild?.name} (${interaction.guild?.id})`);
       await interaction.deferReply();
+
+      // Vérifier le plan premium
+      const plan = await getGuildPlan(interaction.guild.id, client.supabase);
+      const hasAIFeature = await hasFeature(interaction.guild.id, 'ai', client.supabase);
+
+      if (!hasAIFeature) {
+        return interaction.editReply({
+          content: `❌ ${getLimitErrorMessage('aiRequests', plan?.plan_type || 'free')}`,
+        });
+      }
 
       // Vérifier les clés API disponibles
       const hasGroq = !!process.env.GROQ_API_KEY;
@@ -486,6 +496,15 @@ export const commands = [
     execute: async (interaction, client) => {
       await interaction.deferReply({ ephemeral: true });
 
+      // Vérifier le plan premium
+      const hasCountersFeature = await hasFeature(interaction.guild.id, 'channelCounters', client.supabase);
+
+      if (!hasCountersFeature) {
+        return interaction.editReply({
+          content: `❌ Les channel counters nécessitent un plan premium.\n\n💎 **Passez à Pro** pour débloquer cette fonctionnalité : \`/ci-upgrade\``,
+        });
+      }
+
       try {
         const action = interaction.options.getString('action');
         const guildId = interaction.guild.id;
@@ -585,6 +604,16 @@ export const commands = [
     execute: async (interaction, client) => {
       await interaction.deferReply();
 
+      // Vérifier le plan premium
+      const plan = await getGuildPlan(interaction.guild.id, client.supabase);
+      const hasSentimentFeature = await hasFeature(interaction.guild.id, 'sentimentAnalysis', client.supabase);
+
+      if (!hasSentimentFeature) {
+        return interaction.editReply({
+          content: `❌ L'analyse de sentiment nécessite un plan premium.\n\n💎 **Passez à Pro** pour débloquer cette fonctionnalité : \`/ci-upgrade\``,
+        });
+      }
+
       try {
         const guildId = interaction.guild.id;
         const channel = interaction.options.getChannel('canal');
@@ -666,6 +695,16 @@ export const commands = [
     description: '🔮 Prédictions et alertes proactives pour les 7 prochains jours',
     execute: async (interaction, client) => {
       await interaction.deferReply();
+
+      // Vérifier le plan premium
+      const plan = await getGuildPlan(interaction.guild.id, client.supabase);
+      const hasPredictionsFeature = await hasFeature(interaction.guild.id, 'predictions', client.supabase);
+
+      if (!hasPredictionsFeature) {
+        return interaction.editReply({
+          content: `❌ Les prédictions nécessitent un plan premium.\n\n💎 **Passez à Pro** pour débloquer cette fonctionnalité : \`/ci-upgrade\``,
+        });
+      }
 
       try {
         const guildId = interaction.guild.id;
@@ -772,6 +811,15 @@ export const commands = [
     execute: async (interaction, client) => {
       await interaction.deferReply({ ephemeral: true });
 
+      // Vérifier le plan premium
+      const hasQuestsFeature = await hasFeature(interaction.guild.id, 'quests', client.supabase);
+
+      if (!hasQuestsFeature) {
+        return interaction.editReply({
+          content: `❌ Les quêtes personnalisées nécessitent un plan premium.\n\n💎 **Passez à Pro** pour débloquer cette fonctionnalité : \`/ci-upgrade\``,
+        });
+      }
+
       try {
         const action = interaction.options.getString('action');
         const userId = interaction.user.id;
@@ -844,6 +892,15 @@ export const commands = [
     ],
     execute: async (interaction, client) => {
       await interaction.deferReply();
+
+      // Vérifier le plan premium (Business+)
+      const hasModPerformanceFeature = await hasFeature(interaction.guild.id, 'modPerformance', client.supabase);
+
+      if (!hasModPerformanceFeature) {
+        return interaction.editReply({
+          content: `❌ Le suivi de performance des modérateurs nécessite un plan Business ou Enterprise.\n\n🚀 **Passez à Business** pour débloquer cette fonctionnalité : \`/ci-upgrade\``,
+        });
+      }
 
       try {
         const modUser = interaction.options.getUser('modérateur') || interaction.user;
