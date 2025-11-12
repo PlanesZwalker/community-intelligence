@@ -703,6 +703,9 @@ export default function Dashboard() {
                 <Link href="/terms" className="text-gray-400 hover:text-white transition-colors">
                   Conditions
                 </Link>
+                <Link href="/cgv" className="text-gray-400 hover:text-white transition-colors">
+                  CGV
+                </Link>
               </div>
             </div>
           </div>

@@ -367,12 +367,15 @@ export default function LandingPage() {
             <div className="text-gray-400 text-sm">
               © {new Date().getFullYear()} Community Intelligence Bot. Tous droits réservés.
             </div>
-            <div className="flex gap-6">
+            <div className="flex gap-6 flex-wrap justify-center">
               <Link href="/privacy" className="text-gray-400 hover:text-white text-sm transition-colors">
                 Politique de Confidentialité
               </Link>
               <Link href="/terms" className="text-gray-400 hover:text-white text-sm transition-colors">
                 Conditions d'Utilisation
+              </Link>
+              <Link href="/cgv" className="text-gray-400 hover:text-white text-sm transition-colors">
+                CGV
               </Link>
               <Link href="https://github.com/PlanesZwalker/community-intelligence" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white text-sm transition-colors">
                 GitHub

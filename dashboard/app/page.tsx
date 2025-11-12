@@ -144,13 +144,17 @@ export default function Home() {
             <p className="text-gray-400 text-xs mb-2">
               En utilisant ce service, vous acceptez nos
             </p>
-            <div className="flex gap-4 justify-center">
+            <div className="flex gap-4 justify-center flex-wrap">
               <Link href="/privacy" className="text-gray-400 hover:text-white text-xs transition-colors">
-                Politique de Confidentialité
+                Confidentialité
               </Link>
               <span className="text-gray-600">•</span>
               <Link href="/terms" className="text-gray-400 hover:text-white text-xs transition-colors">
-                Conditions d'Utilisation
+                Conditions
+              </Link>
+              <span className="text-gray-600">•</span>
+              <Link href="/cgv" className="text-gray-400 hover:text-white text-xs transition-colors">
+                CGV
               </Link>
             </div>
           </div>
