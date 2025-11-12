@@ -123,12 +123,22 @@ export default function Home() {
           <p className="text-gray-400">
             Dashboard d'analyse pour votre communauté Discord
           </p>
-          <Link 
-            href="/landing" 
-            className="text-blue-400 hover:text-blue-300 text-sm mt-2 inline-block"
-          >
-            Découvrir les fonctionnalités →
-          </Link>
+          <div className="flex flex-col gap-2 mt-4">
+            <Link 
+              href="/landing" 
+              className="text-blue-400 hover:text-blue-300 text-sm inline-block"
+            >
+              Découvrir les fonctionnalités →
+            </Link>
+            <a
+              href="https://discord.com/api/oauth2/authorize?client_id=1437809276927213628&permissions=274877906944&scope=bot%20applications.commands"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-green-400 hover:text-green-300 text-sm inline-block"
+            >
+              🤖 Inviter le bot sur Discord →
+            </a>
+          </div>
         </div>
 
         {errorMessage && (

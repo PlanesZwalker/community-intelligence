@@ -159,20 +159,53 @@ export default function LandingPage() {
           <p className="text-xl text-gray-300 mb-8">
             Bot Discord d'analyse avec IA générative. Statistiques, prédictions, gamification et bien plus encore.
           </p>
-          <div className="flex gap-4 justify-center">
-            <Link
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <a
               href="https://discord.com/api/oauth2/authorize?client_id=1437809276927213628&permissions=274877906944&scope=bot%20applications.commands"
               target="_blank"
-              className="px-8 py-4 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors font-semibold text-lg flex items-center gap-2"
+              rel="noopener noreferrer"
+              className="px-8 py-4 bg-blue-600 hover:bg-blue-700 rounded-lg transition-all font-semibold text-lg flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105"
             >
-              Inviter le bot <ArrowRight className="w-5 h-5" />
-            </Link>
+              <Bot className="w-5 h-5" />
+              Inviter le bot sur Discord
+              <ArrowRight className="w-5 h-5" />
+            </a>
             <Link
               href="/dashboard"
               className="px-8 py-4 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors font-semibold text-lg"
             >
               Voir le dashboard
             </Link>
+          </div>
+          <p className="text-sm text-gray-400 mt-4">
+            ⚡ Invitation en 1 clic • Aucune configuration requise • Fonctionne immédiatement
+          </p>
+        </div>
+      </section>
+
+      {/* Quick Invite Section */}
+      <section className="container mx-auto px-4 py-12">
+        <div className="max-w-3xl mx-auto bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-xl p-8 border border-blue-500/30">
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-bold text-white mb-2">🚀 Invitez le bot en 30 secondes</h2>
+            <p className="text-gray-300">Cliquez sur le bouton ci-dessous pour ajouter Community Intelligence à votre serveur Discord</p>
+          </div>
+          <div className="flex flex-col items-center gap-4">
+            <a
+              href="https://discord.com/api/oauth2/authorize?client_id=1437809276927213628&permissions=274877906944&scope=bot%20applications.commands"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full sm:w-auto px-10 py-5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-lg transition-all font-bold text-xl flex items-center justify-center gap-3 shadow-2xl hover:shadow-blue-500/50 transform hover:scale-105"
+            >
+              <Bot className="w-6 h-6" />
+              Inviter Community Intelligence
+              <ArrowRight className="w-6 h-6" />
+            </a>
+            <div className="text-sm text-gray-400 space-y-1">
+              <p>✅ Aucune configuration requise</p>
+              <p>✅ Commence à collecter les données immédiatement</p>
+              <p>✅ Compatible avec tous les serveurs Discord</p>
+            </div>
           </div>
         </div>
       </section>
