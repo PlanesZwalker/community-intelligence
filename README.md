@@ -133,6 +133,9 @@ npm run dev
 - `/ci-predictions` - 🔮 Prédictions et alertes proactives pour les 7 prochains jours
 - `/ci-quest` - 🎯 Quêtes personnalisées quotidiennes générées par IA
 - `/ci-mod-report` - 📊 Rapport de performance des modérateurs
+- `/ci-voice-stats` - 🎤 Statistiques de l'activité vocale du serveur
+- `/ci-trust-score` - 🛡️ Score de confiance d'un membre (détection spam avancée)
+- `/ci-badges` - 🏆 Badges et achievements visuels
 
 > **⏱️ Note importante** : Les commandes globales peuvent prendre jusqu'à **1 heure** pour apparaître dans Discord après l'enregistrement. Si les commandes n'apparaissent pas immédiatement, attendez quelques minutes ou utilisez-les directement en tapant `/ci-stats` même si elles n'apparaissent pas dans l'autocomplétion.
 

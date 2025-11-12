@@ -284,3 +284,131 @@ export async function getBotDetectionStats(guildId, supabase) {
   };
 }
 
+/**
+ * Calcule un score de confiance pour un utilisateur (0-100)
+ */
+export async function calculateTrustScore(userId, guildId, supabase, guild) {
+  let score = 50; // Score de base
+  const reasons = [];
+
+  try {
+    const member = await guild.members.fetch(userId).catch(() => null);
+    if (!member) {
+      return {
+        score: 0,
+        reasons: [{ positive: false, reason: 'Membre introuvable dans le serveur' }],
+      };
+    }
+
+    const user = member.user;
+
+    // 1. Âge du compte
+    const accountAge = Date.now() - user.createdTimestamp;
+    const daysOld = accountAge / (1000 * 60 * 60 * 24);
+
+    if (daysOld > 365) {
+      score += 20;
+      reasons.push({ positive: true, reason: `Compte créé il y a ${Math.round(daysOld)} jours (> 1 an)` });
+    } else if (daysOld > 180) {
+      score += 10;
+      reasons.push({ positive: true, reason: `Compte créé il y a ${Math.round(daysOld)} jours (> 6 mois)` });
+    } else if (daysOld < 7) {
+      score -= 30;
+      reasons.push({ positive: false, reason: `Compte créé il y a ${Math.round(daysOld)} jours (< 7 jours)` });
+    }
+
+    // 2. Avatar
+    if (user.avatar) {
+      score += 10;
+      reasons.push({ positive: true, reason: 'Avatar personnalisé' });
+    } else {
+      score -= 10;
+      reasons.push({ positive: false, reason: 'Pas d\'avatar personnalisé' });
+    }
+
+    // 3. Historique des messages
+    const { data: userMessages } = await supabase
+      .from('messages')
+      .select('content, created_at, is_reply, reaction_count')
+      .eq('guild_id', guildId)
+      .eq('author_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    if (userMessages && userMessages.length > 0) {
+      score += 15;
+      reasons.push({ positive: true, reason: `${userMessages.length} messages récents dans le serveur` });
+
+      // Vérifier la diversité des messages
+      const uniqueMessages = new Set(userMessages.map(m => m.content.toLowerCase().trim()));
+      const repetitionRate = 1 - (uniqueMessages.size / userMessages.length);
+
+      if (repetitionRate < 0.3) {
+        score += 10;
+        reasons.push({ positive: true, reason: 'Messages variés (faible répétition)' });
+      } else if (repetitionRate > 0.7) {
+        score -= 20;
+        reasons.push({ positive: false, reason: `Taux de répétition élevé (${Math.round(repetitionRate * 100)}%)` });
+      }
+
+      // Vérifier les réponses (engagement)
+      const replies = userMessages.filter(m => m.is_reply).length;
+      if (replies > userMessages.length * 0.3) {
+        score += 10;
+        reasons.push({ positive: true, reason: 'Bon taux de réponses aux messages' });
+      }
+
+      // Vérifier les réactions reçues
+      const totalReactions = userMessages.reduce((sum, m) => sum + (m.reaction_count || 0), 0);
+      if (totalReactions > userMessages.length * 0.5) {
+        score += 10;
+        reasons.push({ positive: true, reason: 'Messages bien reçus par la communauté' });
+      }
+    } else {
+      score -= 15;
+      reasons.push({ positive: false, reason: 'Aucun message récent dans le serveur' });
+    }
+
+    // 4. Nom d'utilisateur suspect
+    const username = user.username.toLowerCase();
+    if (/\d{4,}/.test(username) || /bot|spam|test|fake/i.test(username)) {
+      score -= 15;
+      reasons.push({ positive: false, reason: 'Nom d\'utilisateur suspect' });
+    }
+
+    // 5. Vérifier si c'est un bot Discord officiel
+    if (user.bot) {
+      score = 0;
+      reasons.push({ positive: false, reason: 'Compte bot Discord officiel' });
+    }
+
+    // 6. Vérifier l'activité récente
+    if (userMessages && userMessages.length > 0) {
+      const lastMessage = new Date(userMessages[0].created_at);
+      const daysSinceLastMessage = (Date.now() - lastMessage.getTime()) / (1000 * 60 * 60 * 24);
+
+      if (daysSinceLastMessage < 1) {
+        score += 5;
+        reasons.push({ positive: true, reason: 'Actif récemment' });
+      } else if (daysSinceLastMessage > 30) {
+        score -= 10;
+        reasons.push({ positive: false, reason: `Inactif depuis ${Math.round(daysSinceLastMessage)} jours` });
+      }
+    }
+
+    // Normaliser le score entre 0 et 100
+    score = Math.max(0, Math.min(100, score));
+
+    return {
+      score: Math.round(score),
+      reasons,
+    };
+  } catch (error) {
+    console.error('Erreur calcul trust score:', error);
+    return {
+      score: 50,
+      reasons: [{ positive: false, reason: 'Erreur lors du calcul du score' }],
+    };
+  }
+}
+

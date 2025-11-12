@@ -10,6 +10,8 @@ import { analyzeChannelSentiment, analyzeGuildSentiment } from '../utils/sentime
 import { generatePredictions } from '../utils/predictions.js';
 import { generatePersonalQuest } from '../utils/questSystem.js';
 import { getVoiceStats } from '../utils/voiceAnalytics.js';
+import { calculateTrustScore } from '../utils/botDetection.js';
+import { getUserBadges } from '../utils/badges.js';
 
 /**
  * Gère les commandes slash
@@ -887,6 +889,201 @@ export const commands = [
         await interaction.editReply({ embeds: [embed] });
       } catch (error) {
         console.error('Erreur dans /ci-mod-report:', error);
+        await interaction.editReply({
+          content: `❌ Erreur: ${error.message}`,
+        });
+      }
+    },
+  },
+  {
+    name: 'ci-voice-stats',
+    description: '🎤 Statistiques de l\'activité vocale du serveur',
+    options: [
+      {
+        name: 'période',
+        type: 3, // STRING
+        description: 'Période d\'analyse',
+        required: false,
+        choices: [
+          { name: '7 derniers jours', value: '168' },
+          { name: '30 derniers jours', value: '720' },
+        ],
+      },
+    ],
+    execute: async (interaction, client) => {
+      await interaction.deferReply();
+
+      try {
+        const guildId = interaction.guild.id;
+        const periodHours = parseInt(interaction.options.getString('période') || '168');
+        const stats = await getVoiceStats(guildId, client.supabase, periodHours);
+
+        if (stats.message) {
+          return interaction.editReply({
+            content: `📊 ${stats.message}\n\n💡 Les statistiques vocales seront disponibles une fois que des membres auront utilisé les canaux vocaux.`,
+          });
+        }
+
+        // Formater les top membres
+        let topMembersText = 'Aucun membre vocal actif';
+        if (stats.topMembers.length > 0) {
+          topMembersText = stats.topMembers
+            .slice(0, 10)
+            .map((member, index) => {
+              const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
+              return `${medal} <@${member.user_id}> - ${member.hours}h (${member.sessions} sessions)`;
+            })
+            .join('\n');
+        }
+
+        // Formater les top canaux
+        let topChannelsText = 'Aucun canal vocal actif';
+        if (stats.topChannels.length > 0) {
+          topChannelsText = stats.topChannels
+            .map((channel, index) => {
+              return `${index + 1}. <#${channel.channel_id}> - ${channel.hours}h`;
+            })
+            .join('\n');
+        }
+
+        // Formater les heures de pic
+        let peakHoursText = 'Données insuffisantes';
+        if (stats.peakHours.length > 0) {
+          peakHoursText = stats.peakHours
+            .map((peak, index) => {
+              return `${index + 1}. ${peak.hour}h00 - ${peak.sessions} sessions`;
+            })
+            .join('\n');
+        }
+
+        const embed = new EmbedBuilder()
+          .setTitle('🎤 STATISTIQUES VOCALES')
+          .setColor(0x5865F2)
+          .setDescription(`Période : ${periodHours / 24} derniers jours`)
+          .addFields(
+            {
+              name: '📊 Vue d\'ensemble',
+              value: `**Temps total:** ${stats.totalHours}h\n**Membres actifs:** ${stats.activeMembers}\n**Sessions totales:** ${stats.totalSessions}`,
+              inline: false,
+            },
+            {
+              name: '🏆 TOP VOCAL',
+              value: topMembersText.length > 1024 ? topMembersText.substring(0, 1020) + '...' : topMembersText,
+              inline: false,
+            },
+            {
+              name: '📊 CANAUX POPULAIRES',
+              value: topChannelsText.length > 1024 ? topChannelsText.substring(0, 1020) + '...' : topChannelsText,
+              inline: false,
+            },
+            {
+              name: '⏰ HEURES DE PIC',
+              value: peakHoursText,
+              inline: false,
+            }
+          )
+          .setTimestamp()
+          .setFooter({ text: 'Community Intelligence Bot - Voice Analytics' });
+
+        await interaction.editReply({ embeds: [embed] });
+      } catch (error) {
+        console.error('Erreur dans /ci-voice-stats:', error);
+        await interaction.editReply({
+          content: `❌ Erreur: ${error.message}`,
+        });
+      }
+    },
+  },
+  {
+    name: 'ci-trust-score',
+    description: '🛡️ Affiche le score de confiance d\'un membre',
+    options: [
+      {
+        name: 'membre',
+        type: 6, // USER
+        description: 'Membre à analyser (optionnel, vous-même par défaut)',
+        required: false,
+      },
+    ],
+    execute: async (interaction, client) => {
+      await interaction.deferReply();
+
+      try {
+        const targetUser = interaction.options.getUser('membre') || interaction.user;
+        const guildId = interaction.guild.id;
+
+        const trustScore = await calculateTrustScore(targetUser.id, guildId, client.supabase, interaction.guild);
+
+        const scoreColor = trustScore.score >= 70 ? 0x57F287 : trustScore.score >= 40 ? 0xFEE75C : 0xED4245;
+        const scoreEmoji = trustScore.score >= 70 ? '✅' : trustScore.score >= 40 ? '⚠️' : '❌';
+        const scoreLabel = trustScore.score >= 70 ? 'Membre légitime' : trustScore.score >= 40 ? 'Suspect' : 'Très suspect';
+
+        const reasonsText = trustScore.reasons.length > 0
+          ? trustScore.reasons.map(r => `${r.positive ? '✅' : '⚠️'} ${r.reason}`).join('\n')
+          : 'Aucun indicateur spécifique';
+
+        const embed = new EmbedBuilder()
+          .setTitle(`🛡️ SCORE DE CONFIANCE - ${targetUser.displayName}`)
+          .setColor(scoreColor)
+          .setDescription(`${scoreEmoji} **Score: ${trustScore.score}/100** - ${scoreLabel}`)
+          .addFields(
+            {
+              name: '📊 Détails',
+              value: reasonsText.length > 1024 ? reasonsText.substring(0, 1020) + '...' : reasonsText,
+              inline: false,
+            }
+          )
+          .setThumbnail(targetUser.displayAvatarURL())
+          .setTimestamp()
+          .setFooter({ text: 'Community Intelligence Bot - Trust Score' });
+
+        await interaction.editReply({ embeds: [embed] });
+      } catch (error) {
+        console.error('Erreur dans /ci-trust-score:', error);
+        await interaction.editReply({
+          content: `❌ Erreur: ${error.message}`,
+        });
+      }
+    },
+  },
+  {
+    name: 'ci-badges',
+    description: '🏆 Affiche tes badges et achievements',
+    options: [
+      {
+        name: 'membre',
+        type: 6, // USER
+        description: 'Membre à voir (optionnel, vous-même par défaut)',
+        required: false,
+      },
+    ],
+    execute: async (interaction, client) => {
+      await interaction.deferReply({ ephemeral: true });
+
+      try {
+        const targetUser = interaction.options.getUser('membre') || interaction.user;
+        const guildId = interaction.guild.id;
+
+        const badges = await getUserBadges(targetUser.id, guildId, client.supabase, interaction.guild);
+
+        if (badges.length === 0) {
+          return interaction.editReply({
+            content: `🏆 ${targetUser.displayName} n'a pas encore de badges.\n\n💡 Envoie des messages, réponds aux questions et sois actif pour débloquer des badges !`,
+          });
+        }
+
+        const badgesText = badges.map(b => `${b.emoji} **${b.name}** - ${b.description}`).join('\n');
+
+        const embed = new EmbedBuilder()
+          .setTitle(`🏆 BADGES - ${targetUser.displayName}`)
+          .setColor(0xFFD700)
+          .setDescription(badgesText)
+          .setThumbnail(targetUser.displayAvatarURL())
+          .setFooter({ text: `Total: ${badges.length} badges` });
+
+        await interaction.editReply({ embeds: [embed] });
+      } catch (error) {
+        console.error('Erreur dans /ci-badges:', error);
         await interaction.editReply({
           content: `❌ Erreur: ${error.message}`,
         });

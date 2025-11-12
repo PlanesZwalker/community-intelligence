@@ -8,6 +8,7 @@ import { registerCommands } from './utils/registerCommands.js';
 import { checkConfig } from './utils/checkConfig.js';
 import { syncHistory } from './utils/syncHistory.js';
 import { updateAllChannelCounters } from './utils/channelCounters.js';
+import { trackVoiceSession } from './utils/voiceAnalytics.js';
 
 // Charger les variables d'environnement
 config();
@@ -24,6 +25,7 @@ const client = new Client({
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.GuildVoiceStates, // Pour tracker l'activité vocale
   ],
 });
 
@@ -135,12 +137,126 @@ client.once(Events.ClientReady, async (readyClient) => {
   }, 30000); // 30 secondes après le démarrage
 });
 
+// Gérer les nouveaux membres
+client.on(Events.GuildMemberAdd, async (member) => {
+  try {
+    // Attendre quelques secondes pour que le membre envoie quelques messages
+    setTimeout(async () => {
+      const interests = await analyzeNewMemberInterests(
+        member.user.id,
+        member.guild.id,
+        supabase,
+        member.guild
+      );
+
+      await sendWelcomeMessage(
+        member,
+        interests.interests,
+        interests.suggestedChannels,
+        interests.suggestedRoles,
+        member.guild
+      );
+    }, 30000); // 30 secondes après l'arrivée
+  } catch (error) {
+    console.error('Erreur onboarding nouveau membre:', error);
+  }
+});
+
 // Gérer les messages
 client.on(Events.MessageCreate, async (message) => {
   // Ignorer les messages du bot
   if (message.author.bot) return;
   
   await messageHandler(message, supabase);
+});
+
+// Gérer l'activité vocale
+client.on(Events.VoiceStateUpdate, async (oldState, newState) => {
+  try {
+    // Ignorer les bots
+    if (newState.member?.user.bot || oldState.member?.user.bot) return;
+
+    const userId = newState.member?.user.id || oldState.member?.user.id;
+    const guildId = newState.guild.id;
+
+    // Utilisateur rejoint un canal vocal
+    if (!oldState.channelId && newState.channelId) {
+      await trackVoiceSession(
+        userId,
+        guildId,
+        newState.channelId,
+        new Date(),
+        null, // Session en cours
+        supabase
+      );
+    }
+
+    // Utilisateur quitte un canal vocal
+    if (oldState.channelId && !newState.channelId) {
+      // Trouver la session en cours
+      const { data: ongoingSession } = await supabase
+        .from('voice_sessions')
+        .select('joined_at')
+        .eq('user_id', userId)
+        .eq('guild_id', guildId)
+        .eq('channel_id', oldState.channelId)
+        .is('left_at', null)
+        .order('joined_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (ongoingSession) {
+        const joinedAt = new Date(ongoingSession.joined_at);
+        await trackVoiceSession(
+          userId,
+          guildId,
+          oldState.channelId,
+          joinedAt,
+          new Date(),
+          supabase
+        );
+      }
+    }
+
+    // Utilisateur change de canal vocal
+    if (oldState.channelId && newState.channelId && oldState.channelId !== newState.channelId) {
+      // Fermer l'ancienne session
+      const { data: ongoingSession } = await supabase
+        .from('voice_sessions')
+        .select('joined_at')
+        .eq('user_id', userId)
+        .eq('guild_id', guildId)
+        .eq('channel_id', oldState.channelId)
+        .is('left_at', null)
+        .order('joined_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (ongoingSession) {
+        const joinedAt = new Date(ongoingSession.joined_at);
+        await trackVoiceSession(
+          userId,
+          guildId,
+          oldState.channelId,
+          joinedAt,
+          new Date(),
+          supabase
+        );
+      }
+
+      // Créer une nouvelle session
+      await trackVoiceSession(
+        userId,
+        guildId,
+        newState.channelId,
+        new Date(),
+        null,
+        supabase
+      );
+    }
+  } catch (error) {
+    console.error('Erreur tracking vocal:', error);
+  }
 });
 
 // Gérer les interactions (commandes slash)
