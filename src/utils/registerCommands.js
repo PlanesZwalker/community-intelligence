@@ -10,6 +10,7 @@ export async function registerCommands(client) {
   const commandsData = commands.map(cmd => ({
     name: cmd.name,
     description: cmd.description,
+    options: cmd.options || [], // Inclure les options (paramètres) de la commande
   }));
 
   // Stocker les commandes dans le client
