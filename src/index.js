@@ -7,6 +7,7 @@ import { commandHandler } from './handlers/commandHandler.js';
 import { registerCommands } from './utils/registerCommands.js';
 import { checkConfig } from './utils/checkConfig.js';
 import { syncHistory } from './utils/syncHistory.js';
+import { updateAllChannelCounters } from './utils/channelCounters.js';
 
 // Charger les variables d'environnement
 config();

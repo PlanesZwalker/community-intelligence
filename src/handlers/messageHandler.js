@@ -1,4 +1,5 @@
 import { addXP, getXPConfig } from '../utils/xpSystem.js';
+import { updateUserRewards } from '../utils/xpRewards.js';
 
 /**
  * Gère la collecte et le stockage des messages
@@ -66,13 +67,27 @@ export async function messageHandler(message, supabase) {
           reason
         );
 
-        // Si l'utilisateur a monté de niveau, on pourrait envoyer un message
-        // (optionnel, pour ne pas spammer)
+        // Si l'utilisateur a monté de niveau, vérifier et attribuer les récompenses
         if (xpResult && xpResult.levelUp) {
-          // Optionnel : envoyer un message de félicitation
-          // await message.channel.send(
-          //   `🎉 Félicitations <@${message.author.id}> ! Tu es maintenant niveau ${xpResult.newLevel} !`
-          // );
+          try {
+            const { awarded } = await updateUserRewards(
+              message.author.id,
+              message.guild.id,
+              xpResult.newLevel,
+              message.guild,
+              supabase
+            );
+
+            // Optionnel : envoyer un message de félicitation avec les récompenses
+            if (awarded.length > 0) {
+              const rolesMention = awarded.map(r => `<@&${r.roleId}>`).join(', ');
+              await message.channel.send(
+                `🎉 Félicitations <@${message.author.id}> ! Tu es maintenant niveau **${xpResult.newLevel}** ! ${rolesMention}`
+              ).catch(() => {}); // Ignorer les erreurs de permission
+            }
+          } catch (rewardError) {
+            console.error('Erreur attribution récompenses:', rewardError);
+          }
         }
       }
     } catch (xpError) {

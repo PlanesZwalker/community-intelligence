@@ -5,6 +5,8 @@ import { generateEngagementRecommendations } from '../utils/aiService.js';
 import { syncHistory } from '../utils/syncHistory.js';
 import { getOrCreateXPProfile, getLeaderboard, getUserRank, xpForNextLevel, calculateLevel } from '../utils/xpSystem.js';
 import { getBotDetectionStats, analyzeChannelSpam, detectActivitySpike } from '../utils/botDetection.js';
+import { createChannelCounter, deleteChannelCounter, getGuildCounters, updateAllChannelCounters } from '../utils/channelCounters.js';
+import { analyzeChannelSentiment, analyzeGuildSentiment } from '../utils/sentimentAnalysis.js';
 
 /**
  * Gère les commandes slash
@@ -436,6 +438,218 @@ export const commands = [
         console.error('Erreur dans /ci-bot-detection:', error);
         await interaction.editReply({
           content: `❌ Erreur lors de la détection de bots: ${error.message}`,
+        });
+      }
+    },
+  },
+  {
+    name: 'ci-counter',
+    description: 'Gère les compteurs visuels dans les canaux',
+    options: [
+      {
+        name: 'action',
+        type: 3, // STRING
+        description: 'Action à effectuer',
+        required: true,
+        choices: [
+          { name: 'Créer un compteur', value: 'create' },
+          { name: 'Supprimer un compteur', value: 'delete' },
+          { name: 'Liste des compteurs', value: 'list' },
+        ],
+      },
+      {
+        name: 'type',
+        type: 3, // STRING
+        description: 'Type de compteur (si création)',
+        required: false,
+        choices: [
+          { name: '📊 Membres totaux', value: 'members' },
+          { name: '💬 Messages totaux', value: 'messages' },
+          { name: '👥 Membres en ligne', value: 'online' },
+          { name: '💬 Messages aujourd\'hui', value: 'messages_today' },
+        ],
+      },
+      {
+        name: 'canal',
+        type: 7, // CHANNEL
+        description: 'Canal pour le compteur (si création/suppression)',
+        required: false,
+      },
+    ],
+    execute: async (interaction, client) => {
+      await interaction.deferReply({ ephemeral: true });
+
+      try {
+        const action = interaction.options.getString('action');
+        const guildId = interaction.guild.id;
+
+        if (action === 'list') {
+          const counters = await getGuildCounters(guildId, client.supabase);
+          
+          if (counters.length === 0) {
+            return interaction.editReply({
+              content: '📊 Aucun compteur configuré pour ce serveur.\n\nUtilisez `/ci-counter create` pour en créer un.',
+            });
+          }
+
+          const countersList = counters.map(c => {
+            const channel = interaction.guild.channels.cache.get(c.channel_id);
+            const channelName = channel ? `#${channel.name}` : `Canal ${c.channel_id}`;
+            const typeNames = {
+              members: '📊 Membres',
+              messages: '💬 Messages',
+              online: '👥 En ligne',
+              messages_today: '💬 Aujourd\'hui',
+            };
+            return `- ${channelName}: ${typeNames[c.counter_type] || c.counter_type}`;
+          }).join('\n');
+
+          const embed = new EmbedBuilder()
+            .setTitle('📊 Compteurs Configurés')
+            .setColor(0x5865F2)
+            .setDescription(countersList)
+            .setFooter({ text: 'Community Intelligence Bot' });
+
+          return interaction.editReply({ embeds: [embed] });
+        }
+
+        const channel = interaction.options.getChannel('canal') || interaction.channel;
+        const counterType = interaction.options.getString('type');
+
+        if (action === 'create') {
+          if (!counterType) {
+            return interaction.editReply({
+              content: '❌ Veuillez spécifier un type de compteur avec l\'option `type`.',
+            });
+          }
+
+          if (!channel.isTextBased() || channel.isDMBased()) {
+            return interaction.editReply({
+              content: '❌ Le canal doit être un canal texte valide.',
+            });
+          }
+
+          await createChannelCounter(guildId, channel.id, counterType, client.supabase);
+          
+          // Mettre à jour immédiatement
+          await updateAllChannelCounters(interaction.guild, client.supabase);
+
+          return interaction.editReply({
+            content: `✅ Compteur créé dans ${channel} ! Le nom du canal sera mis à jour automatiquement.`,
+          });
+        }
+
+        if (action === 'delete') {
+          await deleteChannelCounter(guildId, channel.id, client.supabase);
+          return interaction.editReply({
+            content: `✅ Compteur supprimé de ${channel}.`,
+          });
+        }
+      } catch (error) {
+        console.error('Erreur dans /ci-counter:', error);
+        await interaction.editReply({
+          content: `❌ Erreur: ${error.message}`,
+        });
+      }
+    },
+  },
+  {
+    name: 'ci-sentiment',
+    description: 'Analyse le sentiment des messages (positif/neutre/négatif)',
+    options: [
+      {
+        name: 'canal',
+        type: 7, // CHANNEL
+        description: 'Canal à analyser (optionnel, analyse tout le serveur par défaut)',
+        required: false,
+      },
+      {
+        name: 'période',
+        type: 3, // STRING
+        description: 'Période d\'analyse',
+        required: false,
+        choices: [
+          { name: 'Dernières 24 heures', value: '24' },
+          { name: 'Dernières 7 jours', value: '168' },
+          { name: 'Dernières 30 jours', value: '720' },
+        ],
+      },
+    ],
+    execute: async (interaction, client) => {
+      await interaction.deferReply();
+
+      try {
+        const guildId = interaction.guild.id;
+        const channel = interaction.options.getChannel('canal');
+        const periodHours = parseInt(interaction.options.getString('période') || '24');
+
+        let sentimentData;
+        let title;
+
+        if (channel) {
+          title = `📊 Sentiment du canal ${channel.name}`;
+          sentimentData = await analyzeChannelSentiment(guildId, channel.id, client.supabase, periodHours);
+        } else {
+          title = '📊 Sentiment du serveur';
+          sentimentData = await analyzeGuildSentiment(guildId, client.supabase, periodHours);
+        }
+
+        if (sentimentData.total === 0) {
+          return interaction.editReply({
+            content: '❌ Aucun message à analyser pour cette période.',
+          });
+        }
+
+        // Créer une barre de progression visuelle
+        const barLength = 20;
+        const positifBars = Math.round((sentimentData.positifPercent / 100) * barLength);
+        const neutreBars = Math.round((sentimentData.neutrePercent / 100) * barLength);
+        const négatifBars = barLength - positifBars - neutreBars;
+
+        const progressBar = 
+          '🟢'.repeat(positifBars) + 
+          '🟡'.repeat(neutreBars) + 
+          '🔴'.repeat(négatifBars);
+
+        const sentimentEmoji = {
+          positif: '😊',
+          neutre: '😐',
+          négatif: '😠',
+        };
+
+        const embed = new EmbedBuilder()
+          .setTitle(title)
+          .setColor(
+            sentimentData.sentiment === 'positif' ? 0x57F287 :
+            sentimentData.sentiment === 'négatif' ? 0xED4245 :
+            0xFEE75C
+          )
+          .setDescription(`${sentimentEmoji[sentimentData.sentiment]} **Sentiment dominant: ${sentimentData.sentiment.toUpperCase()}**`)
+          .addFields(
+            {
+              name: '📊 Répartition',
+              value: `**Positif:** ${sentimentData.positif} (${sentimentData.positifPercent}%)\n**Neutre:** ${sentimentData.neutre} (${sentimentData.neutrePercent}%)\n**Négatif:** ${sentimentData.négatif} (${sentimentData.négatifPercent}%)`,
+              inline: false,
+            },
+            {
+              name: '📈 Visualisation',
+              value: progressBar,
+              inline: false,
+            },
+            {
+              name: '📝 Détails',
+              value: `**Messages analysés:** ${sentimentData.total}\n**Période:** ${periodHours}h`,
+              inline: false,
+            }
+          )
+          .setTimestamp()
+          .setFooter({ text: 'Community Intelligence Bot - Sentiment Analysis' });
+
+        await interaction.editReply({ embeds: [embed] });
+      } catch (error) {
+        console.error('Erreur dans /ci-sentiment:', error);
+        await interaction.editReply({
+          content: `❌ Erreur lors de l'analyse de sentiment: ${error.message}\n\n💡 Assurez-vous que GROQ_API_KEY est configurée.`,
         });
       }
     },
