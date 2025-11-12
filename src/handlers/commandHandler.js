@@ -12,6 +12,8 @@ import { generatePersonalQuest } from '../utils/questSystem.js';
 import { getVoiceStats } from '../utils/voiceAnalytics.js';
 import { calculateTrustScore } from '../utils/botDetection.js';
 import { getUserBadges } from '../utils/badges.js';
+import { createCheckoutSession, createBillingPortal } from '../utils/stripe.js';
+import { getGuildPlan } from '../utils/premium.js';
 
 /**
  * Gère les commandes slash
@@ -1084,6 +1086,223 @@ export const commands = [
         await interaction.editReply({ embeds: [embed] });
       } catch (error) {
         console.error('Erreur dans /ci-badges:', error);
+        await interaction.editReply({
+          content: `❌ Erreur: ${error.message}`,
+        });
+      }
+    },
+  },
+  {
+    name: 'ci-upgrade',
+    description: '💳 Passez à un plan premium',
+    options: [
+      {
+        name: 'plan',
+        type: 3, // STRING
+        description: 'Plan à souscrire',
+        required: true,
+        choices: [
+          { name: '💎 Pro - 25€/mois', value: 'pro' },
+          { name: '🚀 Business - 75€/mois', value: 'business' },
+          { name: '🏢 Enterprise - 250€/mois', value: 'enterprise' },
+        ],
+      },
+    ],
+    execute: async (interaction, client) => {
+      await interaction.deferReply({ ephemeral: true });
+
+      try {
+        const planType = interaction.options.getString('plan');
+        const guildId = interaction.guild.id;
+        const userId = interaction.user.id;
+
+        // Vérifier le plan actuel
+        const currentPlan = await getGuildPlan(guildId, client.supabase);
+        if (currentPlan && currentPlan.plan_type === planType && currentPlan.status === 'active') {
+          return interaction.editReply({
+            content: `✅ Vous avez déjà le plan **${planType.toUpperCase()}** actif !`,
+          });
+        }
+
+        // Créer la session de checkout
+        const { url } = await createCheckoutSession(guildId, planType, userId, client.supabase);
+
+        const planNames = {
+          pro: '💎 Pro',
+          business: '🚀 Business',
+          enterprise: '🏢 Enterprise',
+        };
+
+        const planPrices = {
+          pro: '25€',
+          business: '75€',
+          enterprise: '250€',
+        };
+
+        const embed = new EmbedBuilder()
+          .setTitle('💳 Passer à un plan premium')
+          .setColor(0x5865F2)
+          .setDescription(`Cliquez sur le lien ci-dessous pour souscrire au plan **${planNames[planType]}** (${planPrices[planType]}/mois)`)
+          .addFields(
+            {
+              name: '📋 Plan sélectionné',
+              value: `${planNames[planType]} - ${planPrices[planType]}/mois`,
+              inline: false,
+            },
+            {
+              name: '🔗 Lien de paiement',
+              value: `[Cliquez ici pour payer](${url})`,
+              inline: false,
+            }
+          )
+          .setFooter({ text: 'Paiement sécurisé par Stripe' });
+
+        await interaction.editReply({ embeds: [embed] });
+      } catch (error) {
+        console.error('Erreur dans /ci-upgrade:', error);
+        await interaction.editReply({
+          content: `❌ Erreur lors de la création du lien de paiement: ${error.message}\n\n💡 Assurez-vous que STRIPE_SECRET_KEY est configurée.`,
+        });
+      }
+    },
+  },
+  {
+    name: 'ci-billing',
+    description: '💳 Gérer votre abonnement et factures',
+    execute: async (interaction, client) => {
+      await interaction.deferReply({ ephemeral: true });
+
+      try {
+        const guildId = interaction.guild.id;
+        const userId = interaction.user.id;
+
+        // Vérifier le plan actuel
+        const currentPlan = await getGuildPlan(guildId, client.supabase);
+
+        if (!currentPlan || currentPlan.plan_type === 'free' || !currentPlan.stripe_customer_id) {
+          return interaction.editReply({
+            content: '❌ Aucun abonnement actif trouvé pour ce serveur.\n\n💡 Utilisez `/ci-upgrade` pour souscrire à un plan premium.',
+          });
+        }
+
+        // Créer le portail de facturation
+        const { url } = await createBillingPortal(guildId, userId, client.supabase);
+
+        const embed = new EmbedBuilder()
+          .setTitle('💳 Gestion de l\'abonnement')
+          .setColor(0x5865F2)
+          .setDescription(`Plan actuel: **${currentPlan.plan_type.toUpperCase()}**\nStatus: **${currentPlan.status}**`)
+          .addFields(
+            {
+              name: '🔗 Portail de facturation',
+              value: `[Cliquez ici pour gérer votre abonnement](${url})\n\nVous pourrez :\n- Voir vos factures\n- Modifier votre plan\n- Annuler votre abonnement\n- Mettre à jour votre méthode de paiement`,
+              inline: false,
+            }
+          )
+          .setFooter({ text: 'Gestion sécurisée par Stripe' });
+
+        await interaction.editReply({ embeds: [embed] });
+      } catch (error) {
+        console.error('Erreur dans /ci-billing:', error);
+        await interaction.editReply({
+          content: `❌ Erreur: ${error.message}`,
+        });
+      }
+    },
+  },
+  {
+    name: 'ci-plan',
+    description: '📊 Affiche votre plan actuel et les fonctionnalités disponibles',
+    execute: async (interaction, client) => {
+      await interaction.deferReply({ ephemeral: true });
+
+      try {
+        const guildId = interaction.guild.id;
+        const plan = await getGuildPlan(guildId, client.supabase);
+
+        if (!plan) {
+          return interaction.editReply({
+            content: '❌ Erreur lors de la récupération du plan.',
+          });
+        }
+
+        const planNames = {
+          free: '🆓 Gratuit',
+          pro: '💎 Pro',
+          business: '🚀 Business',
+          enterprise: '🏢 Enterprise',
+        };
+
+        const planFeatures = {
+          free: [
+            '1 serveur',
+            '10,000 messages/mois',
+            'Stats basiques',
+            'Gamification limitée',
+          ],
+          pro: [
+            '5 serveurs',
+            'Messages illimités',
+            'Sentiment analysis',
+            'Prédictions & alertes',
+            'Channel counters',
+            'Voice analytics',
+            'Quêtes personnalisées',
+            'Export CSV',
+          ],
+          business: [
+            'Serveurs illimités',
+            'Tout Pro +',
+            'Mod performance tracking',
+            'Benchmarking',
+            'Webhooks',
+            'API REST',
+            'Discord SEO',
+            'Support prioritaire',
+          ],
+          enterprise: [
+            'Tout Business +',
+            'AI chatbot custom',
+            'White-label',
+            'Onboarding dédié',
+            'SLA 99.9%',
+            'Success manager',
+          ],
+        };
+
+        const embed = new EmbedBuilder()
+          .setTitle('📊 Votre Plan')
+          .setColor(plan.plan_type === 'free' ? 0x95A5A6 : 0x5865F2)
+          .setDescription(`Plan actuel: **${planNames[plan.plan_type]}**\nStatus: **${plan.status}**`)
+          .addFields(
+            {
+              name: '✨ Fonctionnalités incluses',
+              value: planFeatures[plan.plan_type].map(f => `✅ ${f}`).join('\n'),
+              inline: false,
+            }
+          )
+          .setFooter({ text: 'Community Intelligence Bot' });
+
+        if (plan.current_period_end) {
+          const endDate = new Date(plan.current_period_end);
+          embed.addFields({
+            name: '📅 Prochain renouvellement',
+            value: `<t:${Math.floor(endDate.getTime() / 1000)}:R>`,
+            inline: false,
+          });
+        }
+
+        if (plan.plan_type === 'free') {
+          embed.addFields({
+            name: '💳 Passer à un plan premium',
+            value: 'Utilisez `/ci-upgrade` pour découvrir nos plans premium !',
+            inline: false,
+          });
+        }
+
+        await interaction.editReply({ embeds: [embed] });
+      } catch (error) {
+        console.error('Erreur dans /ci-plan:', error);
         await interaction.editReply({
           content: `❌ Erreur: ${error.message}`,
         });

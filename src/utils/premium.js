@@ -55,6 +55,25 @@ const PLAN_LIMITS = {
  */
 export async function getGuildPlan(guildId, supabase) {
   try {
+    // Essayer d'abord guild_subscriptions (nouveau système Stripe)
+    const { data: stripeSub, error: stripeError } = await supabase
+      .from('guild_subscriptions')
+      .select('*')
+      .eq('guild_id', guildId)
+      .single();
+
+    if (stripeSub && !stripeError) {
+      return {
+        guild_id: guildId,
+        plan_type: stripeSub.plan_type || 'free',
+        status: stripeSub.status || 'active',
+        stripe_customer_id: stripeSub.stripe_customer_id,
+        stripe_subscription_id: stripeSub.stripe_subscription_id,
+        current_period_end: stripeSub.current_period_end,
+      };
+    }
+
+    // Fallback sur l'ancienne table subscriptions
     const { data, error } = await supabase
       .from('subscriptions')
       .select('*')

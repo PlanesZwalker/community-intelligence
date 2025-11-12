@@ -10,6 +10,7 @@ import { syncHistory } from './utils/syncHistory.js';
 import { updateAllChannelCounters } from './utils/channelCounters.js';
 import { trackVoiceSession } from './utils/voiceAnalytics.js';
 import { analyzeNewMemberInterests, sendWelcomeMessage } from './utils/onboarding.js';
+import { handleStripeWebhook } from './utils/stripe.js';
 
 // Charger les variables d'environnement
 config();
