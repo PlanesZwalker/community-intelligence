@@ -9,6 +9,7 @@ import { checkConfig } from './utils/checkConfig.js';
 import { syncHistory } from './utils/syncHistory.js';
 import { updateAllChannelCounters } from './utils/channelCounters.js';
 import { trackVoiceSession } from './utils/voiceAnalytics.js';
+import { analyzeNewMemberInterests, sendWelcomeMessage } from './utils/onboarding.js';
 
 // Charger les variables d'environnement
 config();
