@@ -98,6 +98,42 @@ export default function PrivacyPage() {
                   <li><strong>ID client Stripe</strong> : Identifiant pour la gestion des paiements</li>
                 </ul>
                 <p className="text-gray-400 text-sm mt-2">
+                  ⚠️ <strong>Important :</strong> Aucune donnée bancaire n'est stockée par notre service. Les paiements sont gérés par Stripe (PCI-DSS niveau 1).
+                </p>
+              </div>
+
+              <div className="bg-yellow-900/30 border-2 border-yellow-600/50 rounded-lg p-4">
+                <h3 className="font-semibold text-white mb-2">3.5. ⚠️ Utilisation de l'IA Générative (Consentement Requis)</h3>
+                <p className="text-yellow-200 text-sm mb-3">
+                  <strong>IMPORTANT :</strong> Les fonctionnalités d'IA générative nécessitent votre consentement explicite car vos données sont envoyées à des services tiers pour traitement.
+                </p>
+                <ul className="list-disc list-inside text-gray-300 space-y-2 ml-4">
+                  <li><strong>Services IA utilisés :</strong> Groq, OpenAI, ou Anthropic Claude (selon configuration)</li>
+                  <li><strong>Données envoyées :</strong>
+                    <ul className="list-circle list-inside ml-6 mt-1 space-y-1">
+                      <li>Contenu des messages de votre serveur Discord</li>
+                      <li>Métadonnées (auteur, date, canal)</li>
+                      <li>Statistiques agrégées</li>
+                    </ul>
+                  </li>
+                  <li><strong>Utilisation :</strong>
+                    <ul className="list-circle list-inside ml-6 mt-1 space-y-1">
+                      <li>Génération de résumés intelligents</li>
+                      <li>Analyse de sentiment</li>
+                      <li>Recommandations d'engagement</li>
+                      <li>Prédictions et alertes</li>
+                      <li>Génération de quêtes personnalisées</li>
+                    </ul>
+                  </li>
+                  <li><strong>Conservation :</strong> Les données ne sont PAS stockées par le service IA après traitement</li>
+                  <li><strong>Consentement :</strong> Vous devez donner votre consentement explicite avec la commande <code className="bg-gray-800 px-1 rounded">/ci-ai-consent give</code></li>
+                  <li><strong>Révocation :</strong> Vous pouvez retirer votre consentement à tout moment avec <code className="bg-gray-800 px-1 rounded">/ci-ai-consent revoke</code></li>
+                </ul>
+                <p className="text-yellow-200 text-sm mt-3">
+                  🔒 <strong>Conformité RGPD :</strong> Cette utilisation est conforme au RGPD car elle nécessite un consentement explicite et peut être retirée à tout moment.
+                </p>
+              </div>
+                <p className="text-gray-400 text-sm mt-2">
                   💳 <strong>Note :</strong> Les données de paiement (carte bancaire, etc.) sont gérées exclusivement par Stripe et ne sont jamais stockées sur nos serveurs.
                 </p>
               </div>
@@ -261,6 +297,22 @@ export default function PrivacyPage() {
                   <strong className="text-white">Vercel (Hébergement dashboard) :</strong>
                   <p className="text-gray-300 text-sm mt-1">
                     Le dashboard web est hébergé sur Vercel, conforme au RGPD et certifié SOC 2 Type II.
+                  </p>
+                </li>
+                <li>
+                  <strong className="text-yellow-400">⚠️ Services d'IA Générative (Avec Consentement Explicite) :</strong>
+                  <p className="text-gray-300 text-sm mt-1">
+                    <strong>Groq, OpenAI, ou Anthropic Claude</strong> - Pour les fonctionnalités d'IA générative, vos données (contenu des messages, métadonnées) sont envoyées à ces services tiers pour traitement. 
+                    Cette utilisation nécessite votre consentement explicite via la commande <code className="bg-gray-800 px-1 rounded">/ci-ai-consent give</code>.
+                  </p>
+                  <ul className="list-disc list-inside text-gray-300 text-sm mt-2 ml-4 space-y-1">
+                    <li><strong>Groq :</strong> Service gratuit, conforme RGPD, données non stockées après traitement</li>
+                    <li><strong>OpenAI :</strong> Service payant, conforme RGPD, données non utilisées pour l'entraînement des modèles</li>
+                    <li><strong>Anthropic Claude :</strong> Service payant, conforme RGPD, données non stockées après traitement</li>
+                  </ul>
+                  <p className="text-yellow-200 text-sm mt-2">
+                    🔒 <strong>Important :</strong> Vous pouvez retirer votre consentement à tout moment avec <code className="bg-gray-800 px-1 rounded">/ci-ai-consent revoke</code>. 
+                    Aucune nouvelle donnée ne sera alors envoyée aux services IA.
                   </p>
                 </li>
                 <li>

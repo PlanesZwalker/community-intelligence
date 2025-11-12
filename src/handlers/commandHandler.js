@@ -14,6 +14,7 @@ import { calculateTrustScore } from '../utils/botDetection.js';
 import { getUserBadges } from '../utils/badges.js';
 import { createCheckoutSession, createBillingPortal } from '../utils/stripe.js';
 import { getGuildPlan, hasFeature, checkLimit, getLimitErrorMessage } from '../utils/premium.js';
+import { hasAIConsent, giveAIConsent, revokeAIConsent, getAIConsentInfo, getAIConsentWarningMessage } from '../utils/aiConsent.js';
 
 /**
  * Gère les commandes slash
@@ -136,11 +137,19 @@ export const commands = [
   },
   {
     name: 'ci-ai-summary',
-    description: 'Génère un résumé intelligent avec IA (nécessite clé API)',
+    description: 'Génère un résumé intelligent avec IA (nécessite clé API et consentement)',
     execute: async (interaction, client) => {
       console.log('🤖 Commande /ci-ai-summary exécutée');
       console.log(`   Serveur: ${interaction.guild?.name} (${interaction.guild?.id})`);
       await interaction.deferReply();
+
+      // Vérifier le consentement IA (RGPD)
+      const consentGiven = await hasAIConsent(interaction.guild.id, client.supabase);
+      if (!consentGiven) {
+        return interaction.editReply({
+          content: getAIConsentWarningMessage(),
+        });
+      }
 
       // Vérifier le plan premium
       const plan = await getGuildPlan(interaction.guild.id, client.supabase);
@@ -223,6 +232,14 @@ export const commands = [
     description: 'Obtient des recommandations d\'engagement basées sur l\'IA',
     execute: async (interaction, client) => {
       await interaction.deferReply();
+
+      // Vérifier le consentement IA (RGPD)
+      const consentGiven = await hasAIConsent(interaction.guild.id, client.supabase);
+      if (!consentGiven) {
+        return interaction.editReply({
+          content: getAIConsentWarningMessage(),
+        });
+      }
 
       if (!process.env.GROQ_API_KEY && !process.env.OPENAI_API_KEY && !process.env.ANTHROPIC_API_KEY) {
         return interaction.editReply({
@@ -604,6 +621,14 @@ export const commands = [
     execute: async (interaction, client) => {
       await interaction.deferReply();
 
+      // Vérifier le consentement IA (RGPD)
+      const consentGiven = await hasAIConsent(interaction.guild.id, client.supabase);
+      if (!consentGiven) {
+        return interaction.editReply({
+          content: getAIConsentWarningMessage(),
+        });
+      }
+
       // Vérifier le plan premium
       const plan = await getGuildPlan(interaction.guild.id, client.supabase);
       const hasSentimentFeature = await hasFeature(interaction.guild.id, 'sentimentAnalysis', client.supabase);
@@ -695,6 +720,14 @@ export const commands = [
     description: '🔮 Prédictions et alertes proactives pour les 7 prochains jours',
     execute: async (interaction, client) => {
       await interaction.deferReply();
+
+      // Vérifier le consentement IA (RGPD)
+      const consentGiven = await hasAIConsent(interaction.guild.id, client.supabase);
+      if (!consentGiven) {
+        return interaction.editReply({
+          content: getAIConsentWarningMessage(),
+        });
+      }
 
       // Vérifier le plan premium
       const plan = await getGuildPlan(interaction.guild.id, client.supabase);
@@ -810,6 +843,14 @@ export const commands = [
     ],
     execute: async (interaction, client) => {
       await interaction.deferReply({ ephemeral: true });
+
+      // Vérifier le consentement IA (RGPD)
+      const consentGiven = await hasAIConsent(interaction.guild.id, client.supabase);
+      if (!consentGiven) {
+        return interaction.editReply({
+          content: getAIConsentWarningMessage(),
+        });
+      }
 
       // Vérifier le plan premium
       const hasQuestsFeature = await hasFeature(interaction.guild.id, 'quests', client.supabase);
@@ -1427,6 +1468,138 @@ export const commands = [
     },
   },
   {
+    name: 'ci-ai-consent',
+    description: 'Gère le consentement pour l\'utilisation de l\'IA générative (RGPD)',
+    options: [
+      {
+        name: 'action',
+        type: 3, // STRING
+        description: 'Action à effectuer',
+        required: true,
+        choices: [
+          { name: 'Donner mon consentement', value: 'give' },
+          { name: 'Retirer mon consentement', value: 'revoke' },
+          { name: 'Voir le statut', value: 'status' },
+        ],
+      },
+    ],
+    execute: async (interaction, client) => {
+      await interaction.deferReply({ ephemeral: true });
+
+      const action = interaction.options.getString('action');
+      const guildId = interaction.guild.id;
+      const userId = interaction.user.id;
+
+      try {
+        if (action === 'give') {
+          const provider = process.env.AI_PROVIDER || 'groq';
+          const success = await giveAIConsent(guildId, userId, provider, client.supabase);
+
+          if (success) {
+            const embed = new EmbedBuilder()
+              .setTitle('✅ Consentement IA donné')
+              .setColor(0x57F287)
+              .setDescription('Vous avez donné votre consentement pour l\'utilisation de l\'IA générative.')
+              .addFields(
+                {
+                  name: '📋 Informations',
+                  value: [
+                    `**Provider utilisé :** ${provider}`,
+                    `**Date :** ${new Date().toLocaleDateString('fr-FR')}`,
+                    `**Données envoyées :** Contenu des messages, métadonnées`,
+                    `**Utilisation :** Analyse, résumés, recommandations`,
+                  ].join('\n'),
+                  inline: false,
+                },
+                {
+                  name: '🛡️ Vos droits',
+                  value: [
+                    'Vous pouvez retirer votre consentement à tout moment avec `/ci-ai-consent revoke`',
+                    'Vos données ne sont pas stockées par le service IA après traitement',
+                    'Conformité RGPD garantie',
+                  ].join('\n'),
+                  inline: false,
+                }
+              )
+              .setFooter({ text: 'Community Intelligence Bot - Conforme RGPD' })
+              .setTimestamp();
+
+            await interaction.editReply({ embeds: [embed] });
+          } else {
+            await interaction.editReply({
+              content: '❌ Erreur lors de l\'enregistrement du consentement. Veuillez réessayer.',
+            });
+          }
+        } else if (action === 'revoke') {
+          const success = await revokeAIConsent(guildId, userId, client.supabase);
+
+          if (success) {
+            const embed = new EmbedBuilder()
+              .setTitle('✅ Consentement IA retiré')
+              .setColor(0xFEE75C)
+              .setDescription('Votre consentement pour l\'utilisation de l\'IA générative a été retiré.')
+              .addFields(
+                {
+                  name: '📋 Conséquences',
+                  value: [
+                    'Les fonctionnalités IA ne seront plus disponibles',
+                    'Aucune nouvelle donnée ne sera envoyée aux services IA',
+                    'Vous pouvez réactiver à tout moment avec `/ci-ai-consent give`',
+                  ].join('\n'),
+                  inline: false,
+                }
+              )
+              .setFooter({ text: 'Community Intelligence Bot - Conforme RGPD' })
+              .setTimestamp();
+
+            await interaction.editReply({ embeds: [embed] });
+          } else {
+            await interaction.editReply({
+              content: '❌ Erreur lors de la révocation du consentement. Veuillez réessayer.',
+            });
+          }
+        } else if (action === 'status') {
+          const consentInfo = await getAIConsentInfo(guildId, client.supabase);
+
+          const embed = new EmbedBuilder()
+            .setTitle('📋 Statut du consentement IA')
+            .setColor(consentInfo?.ai_consent_given ? 0x57F287 : 0xFEE75C)
+            .addFields(
+              {
+                name: 'Statut',
+                value: consentInfo?.ai_consent_given ? '✅ Consentement donné' : '❌ Consentement non donné',
+                inline: false,
+              }
+            );
+
+          if (consentInfo?.ai_consent_given) {
+            embed.addFields(
+              {
+                name: 'Détails',
+                value: [
+                  `**Provider :** ${consentInfo.ai_provider || 'groq'}`,
+                  `**Date :** ${consentInfo.ai_consent_date ? new Date(consentInfo.ai_consent_date).toLocaleDateString('fr-FR') : 'N/A'}`,
+                ].join('\n'),
+                inline: false,
+              }
+            );
+          } else {
+            embed.setDescription(getAIConsentWarningMessage());
+          }
+
+          embed.setFooter({ text: 'Community Intelligence Bot - Conforme RGPD' }).setTimestamp();
+
+          await interaction.editReply({ embeds: [embed] });
+        }
+      } catch (error) {
+        console.error('Erreur dans /ci-ai-consent:', error);
+        await interaction.editReply({
+          content: `❌ Erreur: ${error.message}`,
+        });
+      }
+    },
+  },
+  {
     name: 'ci-help',
     description: 'Affiche toutes les commandes disponibles et leur description',
     execute: async (interaction, client) => {
@@ -1450,6 +1623,7 @@ export const commands = [
             {
               name: '🤖 IA & Intelligence',
               value: [
+                '`/ci-ai-consent` - Gérer le consentement IA (RGPD)',
                 '`/ci-ai-summary` - Résumé intelligent généré par IA',
                 '`/ci-recommendations` - Recommandations d\'engagement',
                 '`/ci-sentiment` - Analyse de sentiment des messages',
