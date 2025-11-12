@@ -139,6 +139,21 @@ export default function Home() {
               🤖 Inviter le bot sur Discord →
             </a>
           </div>
+          
+          <div className="mt-8 text-center">
+            <p className="text-gray-400 text-xs mb-2">
+              En utilisant ce service, vous acceptez nos
+            </p>
+            <div className="flex gap-4 justify-center">
+              <Link href="/privacy" className="text-gray-400 hover:text-white text-xs transition-colors">
+                Politique de Confidentialité
+              </Link>
+              <span className="text-gray-600">•</span>
+              <Link href="/terms" className="text-gray-400 hover:text-white text-xs transition-colors">
+                Conditions d'Utilisation
+              </Link>
+            </div>
+          </div>
         </div>
 
         {errorMessage && (

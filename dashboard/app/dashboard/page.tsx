@@ -688,6 +688,25 @@ export default function Dashboard() {
             </>
           )}
         </main>
+        
+        {/* Footer */}
+        <footer className="border-t border-gray-800 py-4 mt-8">
+          <div className="container mx-auto px-4">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
+              <div className="text-gray-400">
+                © {new Date().getFullYear()} Community Intelligence Bot
+              </div>
+              <div className="flex gap-4">
+                <Link href="/privacy" className="text-gray-400 hover:text-white transition-colors">
+                  Confidentialité
+                </Link>
+                <Link href="/terms" className="text-gray-400 hover:text-white transition-colors">
+                  Conditions
+                </Link>
+              </div>
+            </div>
+          </div>
+        </footer>
       </div>
     </div>
   )

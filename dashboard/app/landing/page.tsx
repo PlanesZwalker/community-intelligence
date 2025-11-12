@@ -361,19 +361,26 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-gray-700 py-8">
-        <div className="container mx-auto px-4 text-center text-gray-400">
-          <p>© 2024 Community Intelligence. Tous droits réservés.</p>
-          <div className="mt-4 flex justify-center gap-6">
-            <Link href="/terms" className="hover:text-white transition-colors">
-              Conditions d'utilisation
-            </Link>
-            <Link href="/privacy" className="hover:text-white transition-colors">
-              Politique de confidentialité
-            </Link>
-            <Link href="https://github.com/PlanesZwalker/community-intelligence" target="_blank" className="hover:text-white transition-colors">
-              GitHub
-            </Link>
+      <footer className="bg-gray-900 border-t border-gray-800 py-8">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="text-gray-400 text-sm">
+              © {new Date().getFullYear()} Community Intelligence Bot. Tous droits réservés.
+            </div>
+            <div className="flex gap-6">
+              <Link href="/privacy" className="text-gray-400 hover:text-white text-sm transition-colors">
+                Politique de Confidentialité
+              </Link>
+              <Link href="/terms" className="text-gray-400 hover:text-white text-sm transition-colors">
+                Conditions d'Utilisation
+              </Link>
+              <Link href="https://github.com/PlanesZwalker/community-intelligence" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white text-sm transition-colors">
+                GitHub
+              </Link>
+            </div>
+          </div>
+          <div className="mt-4 text-center text-gray-500 text-xs">
+            🛡️ Conforme au RGPD • Vos données sont protégées • Collecte transparente et sécurisée
           </div>
         </div>
       </footer>
