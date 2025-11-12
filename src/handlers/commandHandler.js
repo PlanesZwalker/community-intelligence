@@ -7,6 +7,9 @@ import { getOrCreateXPProfile, getLeaderboard, getUserRank, xpForNextLevel, calc
 import { getBotDetectionStats, analyzeChannelSpam, detectActivitySpike } from '../utils/botDetection.js';
 import { createChannelCounter, deleteChannelCounter, getGuildCounters, updateAllChannelCounters } from '../utils/channelCounters.js';
 import { analyzeChannelSentiment, analyzeGuildSentiment } from '../utils/sentimentAnalysis.js';
+import { generatePredictions } from '../utils/predictions.js';
+import { generatePersonalQuest } from '../utils/questSystem.js';
+import { getVoiceStats } from '../utils/voiceAnalytics.js';
 
 /**
  * Gère les commandes slash
@@ -650,6 +653,242 @@ export const commands = [
         console.error('Erreur dans /ci-sentiment:', error);
         await interaction.editReply({
           content: `❌ Erreur lors de l'analyse de sentiment: ${error.message}\n\n💡 Assurez-vous que GROQ_API_KEY est configurée.`,
+        });
+      }
+    },
+  },
+  {
+    name: 'ci-predictions',
+    description: '🔮 Prédictions et alertes proactives pour les 7 prochains jours',
+    execute: async (interaction, client) => {
+      await interaction.deferReply();
+
+      try {
+        const guildId = interaction.guild.id;
+        const predictions = await generatePredictions(guildId, client.supabase);
+
+        // Formater les VIP inactifs
+        let inactiveVIPsText = 'Aucun membre très actif inactif détecté';
+        if (predictions.inactive_vips.length > 0) {
+          inactiveVIPsText = predictions.inactive_vips
+            .slice(0, 5)
+            .map((vip, index) => {
+              return `${index + 1}. <@${vip.user_id}> - Inactif depuis ${vip.days_inactive} jours (${vip.xp} XP)`;
+            })
+            .join('\n');
+        }
+
+        // Formater les questions non répondues
+        let unansweredText = 'Aucune question ancienne non répondue';
+        if (predictions.unanswered_questions.length > 0) {
+          unansweredText = `${predictions.unanswered_questions.length} questions non répondues depuis 3+ jours`;
+          if (predictions.unanswered_questions.length <= 5) {
+            unansweredText = predictions.unanswered_questions
+              .map((q, i) => `${i + 1}. <#${q.channel_id}> - ${q.content.substring(0, 60)}...`)
+              .join('\n');
+          }
+        }
+
+        // Formater les tendances de canaux
+        let channelTrendsText = 'Aucun canal en baisse significative';
+        if (predictions.channel_trends.length > 0) {
+          channelTrendsText = predictions.channel_trends
+            .map((trend, index) => {
+              return `${index + 1}. <#${trend.channel_id}> : Baisse de ${Math.abs(trend.change)}% (${trend.recent_count} vs ${trend.previous_count} messages)`;
+            })
+            .join('\n');
+        }
+
+        // Formater les recommandations
+        const recommendationsText = predictions.recommendations
+          .map((rec, index) => `${rec.emoji} ${index + 1}. ${rec.text}`)
+          .join('\n') || 'Aucune recommandation spécifique';
+
+        const trendEmoji = predictions.engagement_trend > 0 ? '📈' : predictions.engagement_trend < 0 ? '📉' : '➡️';
+        const trendColor = predictions.engagement_trend > 0 ? 0x57F287 : predictions.engagement_trend < 0 ? 0xED4245 : 0xFEE75C;
+
+        const embed = new EmbedBuilder()
+          .setTitle('🔮 PRÉDICTIONS (7 prochains jours)')
+          .setColor(trendColor)
+          .setDescription(`Analyse basée sur les tendances des 2 dernières semaines`)
+          .addFields(
+            {
+              name: `${trendEmoji} TENDANCES D\'ENGAGEMENT`,
+              value: `**Engagement:** ${predictions.engagement_trend > 0 ? '+' : ''}${predictions.engagement_trend}% (${predictions.engagement_trend > 0 ? 'hausse' : predictions.engagement_trend < 0 ? 'baisse' : 'stable'})\n**Messages quotidiens prévus:** ${predictions.predicted_daily_messages} (vs ${predictions.current_week.dailyMessages} actuellement)\n**Nouveaux membres prévus:** +${predictions.predicted_new_members}`,
+              inline: false,
+            },
+            {
+              name: '⚠️ ALERTES CRITIQUES',
+              value: channelTrendsText.length > 1024 ? channelTrendsText.substring(0, 1020) + '...' : channelTrendsText,
+              inline: false,
+            },
+            {
+              name: '❓ QUESTIONS NON RÉPONDUES',
+              value: unansweredText.length > 1024 ? unansweredText.substring(0, 1020) + '...' : unansweredText,
+              inline: false,
+            },
+            {
+              name: '👥 MEMBRES VIP INACTIFS',
+              value: inactiveVIPsText.length > 1024 ? inactiveVIPsText.substring(0, 1020) + '...' : inactiveVIPsText,
+              inline: false,
+            },
+            {
+              name: '💡 RECOMMANDATIONS',
+              value: recommendationsText.length > 1024 ? recommendationsText.substring(0, 1020) + '...' : recommendationsText,
+              inline: false,
+            }
+          )
+          .setTimestamp()
+          .setFooter({ text: 'Community Intelligence Bot - Prédictions Proactives' });
+
+        await interaction.editReply({ embeds: [embed] });
+      } catch (error) {
+        console.error('Erreur dans /ci-predictions:', error);
+        await interaction.editReply({
+          content: `❌ Erreur lors de la génération des prédictions: ${error.message}`,
+        });
+      }
+    },
+  },
+  {
+    name: 'ci-quest',
+    description: '🎯 Gère les quêtes personnalisées quotidiennes',
+    options: [
+      {
+        name: 'action',
+        type: 3, // STRING
+        description: 'Action à effectuer',
+        required: true,
+        choices: [
+          { name: 'Générer ma quête du jour', value: 'generate' },
+          { name: 'Voir mes quêtes actives', value: 'list' },
+        ],
+      },
+    ],
+    execute: async (interaction, client) => {
+      await interaction.deferReply({ ephemeral: true });
+
+      try {
+        const action = interaction.options.getString('action');
+        const userId = interaction.user.id;
+        const guildId = interaction.guild.id;
+
+        if (action === 'generate') {
+          const quest = await generatePersonalQuest(userId, guildId, client.supabase, interaction.guild);
+
+          const questsText = quest.quests.map((q, i) => `${i + 1}. ${q}`).join('\n');
+
+          const embed = new EmbedBuilder()
+            .setTitle('🎯 QUÊTE DU JOUR')
+            .setColor(0xFFD700)
+            .setDescription(`Quêtes personnalisées pour <@${userId}>`)
+            .addFields(
+              {
+                name: '📋 Objectifs',
+                value: questsText,
+                inline: false,
+              },
+              {
+                name: '🎁 Récompenses',
+                value: `+${quest.rewards.xp} XP${quest.rewards.role ? `\nRôle: ${quest.rewards.role}` : ''}`,
+                inline: false,
+              },
+              {
+                name: '⏰ Expiration',
+                value: `<t:${Math.floor(quest.expiresAt.getTime() / 1000)}:R>`,
+                inline: false,
+              }
+            )
+            .setFooter({ text: 'Community Intelligence Bot - Quêtes' });
+
+          return interaction.editReply({ embeds: [embed] });
+        }
+
+        if (action === 'list') {
+          return interaction.editReply({
+            content: '📋 Fonctionnalité en développement. Utilisez `/ci-quest generate` pour générer une nouvelle quête.',
+          });
+        }
+      } catch (error) {
+        console.error('Erreur dans /ci-quest:', error);
+        await interaction.editReply({
+          content: `❌ Erreur: ${error.message}`,
+        });
+      }
+    },
+  },
+  {
+    name: 'ci-mod-report',
+    description: '📊 Rapport de performance d\'un modérateur',
+    options: [
+      {
+        name: 'modérateur',
+        type: 6, // USER
+        description: 'Modérateur à analyser (optionnel, vous-même par défaut)',
+        required: false,
+      },
+      {
+        name: 'période',
+        type: 3, // STRING
+        description: 'Période d\'analyse',
+        required: false,
+        choices: [
+          { name: '7 derniers jours', value: '7' },
+          { name: '30 derniers jours', value: '30' },
+        ],
+      },
+    ],
+    execute: async (interaction, client) => {
+      await interaction.deferReply();
+
+      try {
+        const modUser = interaction.options.getUser('modérateur') || interaction.user;
+        const periodDays = parseInt(interaction.options.getString('période') || '7');
+        const guildId = interaction.guild.id;
+
+        const periodStart = new Date();
+        periodStart.setDate(periodStart.getDate() - periodDays);
+
+        // Récupérer les messages du mod
+        const { data: modMessages } = await client.supabase
+          .from('messages')
+          .select('*')
+          .eq('guild_id', guildId)
+          .eq('author_id', modUser.id)
+          .gte('created_at', periodStart.toISOString());
+
+        const totalMessages = modMessages?.length || 0;
+        const replies = modMessages?.filter(m => m.is_reply).length || 0;
+        const questionsAnswered = modMessages?.filter(m => m.is_reply && m.reaction_count > 0).length || 0;
+
+        // Calculer le temps de réponse moyen (approximation basée sur les réponses)
+        // Dans une implémentation complète, on trackerait les timestamps des questions/réponses
+
+        const embed = new EmbedBuilder()
+          .setTitle(`📊 RAPPORT MODÉRATION - ${modUser.displayName}`)
+          .setColor(0x5865F2)
+          .setDescription(`Période : ${periodDays} derniers jours`)
+          .addFields(
+            {
+              name: '⚡ RÉACTIVITÉ',
+              value: `**Messages envoyés:** ${totalMessages}\n**Réponses:** ${replies}\n**Questions répondues:** ${questionsAnswered}\n**Taux de réponse:** ${totalMessages > 0 ? Math.round((replies / totalMessages) * 100) : 0}%`,
+              inline: false,
+            },
+            {
+              name: '💬 ENGAGEMENT',
+              value: `**Messages/jour:** ${Math.round(totalMessages / periodDays)}\n**Réactions reçues:** ${modMessages?.reduce((sum, m) => sum + (m.reaction_count || 0), 0) || 0}\n**Messages avec réactions:** ${modMessages?.filter(m => m.reaction_count > 0).length || 0}`,
+              inline: false,
+            }
+          )
+          .setThumbnail(modUser.displayAvatarURL())
+          .setTimestamp()
+          .setFooter({ text: 'Community Intelligence Bot - Mod Performance' });
+
+        await interaction.editReply({ embeds: [embed] });
+      } catch (error) {
+        console.error('Erreur dans /ci-mod-report:', error);
+        await interaction.editReply({
+          content: `❌ Erreur: ${error.message}`,
         });
       }
     },

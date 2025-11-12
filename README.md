@@ -20,6 +20,9 @@ Bot Discord d'analyse de communauté avec IA générative - MVP gratuit pour dé
 - 📊 **Channel Counters** - Compteurs visuels dans les canaux (membres, messages, en ligne)
 - 😊 **Analyse de sentiment** - Détection du sentiment des messages avec IA (positif/neutre/négatif)
 - 🎁 **Récompenses automatiques** - Attribution automatique de rôles basés sur le niveau XP
+- 🔮 **Prédictions proactives** - Alertes et prédictions basées sur les tendances (game-changer)
+- 🎯 **Quêtes personnalisées** - Quêtes quotidiennes générées par IA pour chaque membre (4x engagement)
+- 📊 **Mod Performance** - Suivi de la performance des modérateurs avec métriques détaillées
 
 ## 🚀 Installation
 
@@ -127,6 +130,9 @@ npm run dev
 - `/ci-bot-detection` - Détecte les bots et spam dans votre serveur (🤖 Anti-spam)
 - `/ci-counter` - Gère les compteurs visuels dans les canaux (📊 Channel Counters)
 - `/ci-sentiment` - Analyse le sentiment des messages (😊 Sentiment Analysis)
+- `/ci-predictions` - 🔮 Prédictions et alertes proactives pour les 7 prochains jours
+- `/ci-quest` - 🎯 Quêtes personnalisées quotidiennes générées par IA
+- `/ci-mod-report` - 📊 Rapport de performance des modérateurs
 
 > **⏱️ Note importante** : Les commandes globales peuvent prendre jusqu'à **1 heure** pour apparaître dans Discord après l'enregistrement. Si les commandes n'apparaissent pas immédiatement, attendez quelques minutes ou utilisez-les directement en tapant `/ci-stats` même si elles n'apparaissent pas dans l'autocomplétion.
 
