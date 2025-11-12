@@ -54,7 +54,7 @@ Résumé (max 500 mots) :`;
  * Inscription : https://console.groq.com
  * Crédit gratuit : 14,400 requêtes/jour
  */
-async function generateWithGroq(prompt) {
+export async function generateWithGroq(prompt, maxTokens = 1000) {
   if (!process.env.GROQ_API_KEY) {
     throw new Error('GROQ_API_KEY non configurée');
   }
@@ -92,7 +92,7 @@ async function generateWithGroq(prompt) {
           model,
           messages,
           temperature: 0.7,
-          max_tokens: 1000,
+          max_tokens: maxTokens,
         }),
       });
 

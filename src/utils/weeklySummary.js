@@ -1,4 +1,5 @@
 import { generateSummary } from './aiService.js';
+import { generateChunkedSummary } from './chunkedSummary.js';
 
 /**
  * Génère un résumé hebdomadaire
@@ -83,12 +84,13 @@ export async function getWeeklySummary(guildId, supabase, useAI = false) {
         
         // Pour l'IA, récupérer TOUS les messages disponibles (pas seulement les 7 derniers jours)
         // Cela permet d'analyser l'historique synchronisé même s'il est plus ancien
+        // On récupère tous les messages (sans limite) pour une analyse complète
+        console.log('   📥 Récupération de TOUS les messages pour analyse IA...');
         const { data: recentMessages, error: queryError } = await supabase
           .from('messages')
-          .select('content, author_display_name')
+          .select('content, author_display_name, created_at')
           .eq('guild_id', guildId)
-          .order('created_at', { ascending: false })
-          .limit(100);
+          .order('created_at', { ascending: true }); // Ordre chronologique pour meilleur contexte
 
         if (queryError) {
           console.error('❌ Erreur lors de la récupération des messages:', queryError);
@@ -99,9 +101,18 @@ export async function getWeeklySummary(guildId, supabase, useAI = false) {
           console.log(`📊 Messages récupérés pour IA: ${recentMessages?.length || 0}`);
           
           if (recentMessages && recentMessages.length > 0) {
+            console.log(`   📊 ${recentMessages.length} messages récupérés pour analyse`);
             console.log(`   Premier message: ${recentMessages[0]?.content?.substring(0, 50) || 'N/A'}...`);
-            console.log('🤖 Appel à generateSummary...');
-            aiSummary = await generateSummary(recentMessages, process.env.AI_PROVIDER || 'groq');
+            console.log(`   Dernier message: ${recentMessages[recentMessages.length - 1]?.content?.substring(0, 50) || 'N/A'}...`);
+            
+            // Utiliser le système de chunking pour gérer les grandes quantités de messages
+            if (recentMessages.length > 50) {
+              console.log('   🔄 Utilisation du système de chunking intelligent...');
+              aiSummary = await generateChunkedSummary(recentMessages, process.env.AI_PROVIDER || 'groq');
+            } else {
+              console.log('   🤖 Appel à generateSummary (petit volume)...');
+              aiSummary = await generateSummary(recentMessages, process.env.AI_PROVIDER || 'groq');
+            }
             console.log(`✅ Résumé IA généré (longueur: ${aiSummary?.length || 0} caractères)`);
           } else {
             console.log('⚠️ Aucun message récent trouvé pour générer le résumé IA');
