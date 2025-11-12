@@ -422,6 +422,14 @@ export default function Dashboard() {
 
         {/* Main Content */}
         <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Payment Success Message */}
+          {paymentSuccess && (
+            <div className="mb-6 p-4 bg-green-600/20 border border-green-500 rounded-lg">
+              <p className="text-green-400 font-semibold">✅ Paiement réussi !</p>
+              <p className="text-green-300 text-sm mt-1">Votre abonnement est en cours d'activation. Rafraîchissez la page dans quelques instants.</p>
+            </div>
+          )}
+
           {/* Server Selection & Period Filter */}
           <div className="mb-6 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
             <div className="flex-1">
