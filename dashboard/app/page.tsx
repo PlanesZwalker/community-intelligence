@@ -123,6 +123,12 @@ export default function Home() {
           <p className="text-gray-400">
             Dashboard d'analyse pour votre communauté Discord
           </p>
+          <Link 
+            href="/landing" 
+            className="text-blue-400 hover:text-blue-300 text-sm mt-2 inline-block"
+          >
+            Découvrir les fonctionnalités →
+          </Link>
         </div>
 
         {errorMessage && (
