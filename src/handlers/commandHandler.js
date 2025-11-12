@@ -972,6 +972,15 @@ export const commands = [
     execute: async (interaction, client) => {
       await interaction.deferReply();
 
+      // Vérifier le plan premium
+      const hasVoiceFeature = await hasFeature(interaction.guild.id, 'voiceAnalytics', client.supabase);
+
+      if (!hasVoiceFeature) {
+        return interaction.editReply({
+          content: `❌ Les statistiques vocales nécessitent un plan premium.\n\n💎 **Passez à Pro** pour débloquer cette fonctionnalité : \`/ci-upgrade\``,
+        });
+      }
+
       try {
         const guildId = interaction.guild.id;
         const periodHours = parseInt(interaction.options.getString('période') || '168');
