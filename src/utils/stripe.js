@@ -8,10 +8,13 @@
  */
 export async function createCheckoutSession(guildId, planType, userId, supabase) {
   if (!process.env.STRIPE_SECRET_KEY) {
+    console.error('❌ STRIPE_SECRET_KEY non configurée dans createCheckoutSession');
     throw new Error('STRIPE_SECRET_KEY non configurée');
   }
 
+  console.log('   🔄 Initialisation de Stripe...');
   const stripe = (await import('stripe')).default(process.env.STRIPE_SECRET_KEY);
+  console.log('   ✅ Stripe initialisé');
 
   // Prix des plans (en centimes d'euros)
   const planPrices = {
@@ -32,9 +35,11 @@ export async function createCheckoutSession(guildId, planType, userId, supabase)
   }
 
   // Créer ou récupérer le customer Stripe
+  console.log('   🔄 Récupération du customer Stripe...');
   let customerId = await getStripeCustomerId(guildId, userId, supabase);
 
   if (!customerId) {
+    console.log('   📝 Création d\'un nouveau customer Stripe...');
     // Créer un nouveau customer
     const customer = await stripe.customers.create({
       metadata: {
@@ -43,18 +48,28 @@ export async function createCheckoutSession(guildId, planType, userId, supabase)
       },
     });
     customerId = customer.id;
+    console.log(`   ✅ Customer créé: ${customerId}`);
 
     // Sauvegarder dans Supabase
-    await supabase
+    const { error: supabaseError } = await supabase
       .from('guild_subscriptions')
       .upsert({
         guild_id: guildId,
         stripe_customer_id: customerId,
         user_id: userId,
       });
+    
+    if (supabaseError) {
+      console.error('   ❌ Erreur Supabase lors de la sauvegarde du customer:', supabaseError);
+      throw new Error(`Erreur Supabase: ${supabaseError.message}. Vérifiez que la table guild_subscriptions existe.`);
+    }
+    console.log('   ✅ Customer sauvegardé dans Supabase');
+  } else {
+    console.log(`   ✅ Customer existant trouvé: ${customerId}`);
   }
 
   // Créer la session de checkout
+  console.log('   🔄 Création de la session de checkout...');
   const session = await stripe.checkout.sessions.create({
     customer: customerId,
     payment_method_types: ['card'],
@@ -83,6 +98,9 @@ export async function createCheckoutSession(guildId, planType, userId, supabase)
       plan_type: planType,
     },
   });
+
+  console.log(`   ✅ Session créée: ${session.id}`);
+  console.log(`   🔗 URL: ${session.url}`);
 
   return {
     sessionId: session.id,

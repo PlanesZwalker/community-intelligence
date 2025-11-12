@@ -1178,20 +1178,39 @@ export const commands = [
       await interaction.deferReply({ ephemeral: true });
 
       try {
+        console.log('💳 Commande /ci-upgrade exécutée');
         const planType = interaction.options.getString('plan');
         const guildId = interaction.guild.id;
         const userId = interaction.user.id;
 
+        console.log(`   Plan demandé: ${planType}`);
+        console.log(`   Guild ID: ${guildId}`);
+        console.log(`   User ID: ${userId}`);
+
+        // Vérifier que Stripe est configuré
+        if (!process.env.STRIPE_SECRET_KEY) {
+          console.error('❌ STRIPE_SECRET_KEY non configurée');
+          return interaction.editReply({
+            content: `❌ **Stripe n'est pas configuré**\n\nLe système de paiement n'est pas encore activé. Veuillez contacter l'administrateur.\n\n💡 Pour configurer Stripe, ajoutez \`STRIPE_SECRET_KEY\` dans les variables d'environnement de Render.`,
+          });
+        }
+
+        console.log('   ✅ STRIPE_SECRET_KEY détectée');
+
         // Vérifier le plan actuel
         const currentPlan = await getGuildPlan(guildId, client.supabase);
+        console.log(`   Plan actuel: ${currentPlan?.plan_type || 'free'}, Status: ${currentPlan?.status || 'active'}`);
+        
         if (currentPlan && currentPlan.plan_type === planType && currentPlan.status === 'active') {
           return interaction.editReply({
             content: `✅ Vous avez déjà le plan **${planType.toUpperCase()}** actif !`,
           });
         }
 
+        console.log('   🔄 Création de la session de checkout Stripe...');
         // Créer la session de checkout
         const { url } = await createCheckoutSession(guildId, planType, userId, client.supabase);
+        console.log(`   ✅ Session créée, URL: ${url}`);
 
         const planNames = {
           pro: '💎 Pro',
@@ -1224,10 +1243,33 @@ export const commands = [
           .setFooter({ text: 'Paiement sécurisé par Stripe' });
 
         await interaction.editReply({ embeds: [embed] });
+        console.log('   ✅ Réponse envoyée avec succès');
       } catch (error) {
-        console.error('Erreur dans /ci-upgrade:', error);
+        console.error('❌ Erreur dans /ci-upgrade:', error);
+        console.error('   Stack:', error.stack);
+        console.error('   Message:', error.message);
+        
+        let errorMessage = `❌ Erreur lors de la création du lien de paiement.\n\n`;
+        
+        if (error.message.includes('STRIPE_SECRET_KEY')) {
+          errorMessage += `**Problème** : Stripe n'est pas configuré.\n\n`;
+          errorMessage += `**Solution** :\n`;
+          errorMessage += `1. Allez sur https://dashboard.render.com\n`;
+          errorMessage += `2. Sélectionnez votre service\n`;
+          errorMessage += `3. Allez dans "Environment"\n`;
+          errorMessage += `4. Ajoutez \`STRIPE_SECRET_KEY\` avec votre clé Stripe\n`;
+          errorMessage += `5. Redéployez le bot\n\n`;
+          errorMessage += `💡 Voir \`STRIPE_CONFIG_COMPLETE.md\` pour plus de détails.`;
+        } else if (error.message.includes('guild_subscriptions')) {
+          errorMessage += `**Problème** : La table \`guild_subscriptions\` n'existe pas dans Supabase.\n\n`;
+          errorMessage += `**Solution** : Exécutez \`supabase/schema_stripe.sql\` dans Supabase SQL Editor.`;
+        } else {
+          errorMessage += `**Erreur** : ${error.message}\n\n`;
+          errorMessage += `💡 Vérifiez les logs Render pour plus de détails.`;
+        }
+        
         await interaction.editReply({
-          content: `❌ Erreur lors de la création du lien de paiement: ${error.message}\n\n💡 Assurez-vous que STRIPE_SECRET_KEY est configurée.`,
+          content: errorMessage,
         });
       }
     },
