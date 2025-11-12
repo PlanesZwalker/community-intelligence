@@ -406,6 +406,29 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', bot: client.user?.tag || 'not ready' });
 });
 
+// Webhook Stripe pour les paiements
+app.post('/webhook/stripe', express.raw({ type: 'application/json' }), async (req, res) => {
+  const sig = req.headers['stripe-signature'];
+
+  if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
+    console.error('❌ Configuration Stripe manquante');
+    return res.status(500).send('Configuration Stripe manquante');
+  }
+
+  try {
+    const stripe = (await import('stripe')).default(process.env.STRIPE_SECRET_KEY);
+    const event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+
+    // Traiter le webhook
+    await handleStripeWebhook(event, supabase);
+
+    res.json({ received: true });
+  } catch (err) {
+    console.error('❌ Erreur webhook Stripe:', err.message);
+    res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+});
+
 // Démarrer le serveur Express
 app.listen(PORT, () => {
   console.log(`🌐 Serveur HTTP démarré sur le port ${PORT}`);
