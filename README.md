@@ -871,7 +871,7 @@ Tous les schémas SQL sont disponibles dans `supabase/` :
 
 - **Documentation** : Voir le dossier `docs/` pour guides détaillés
 - **Issues** : Ouvrir une issue sur GitHub pour signaler un problème
-- **Email** : support@community-intelligence.com (pour questions premium)
+- **Support** : [Serveur Discord de support](https://discord.gg/community-intelligence) (pour questions premium et assistance)
 
 ### Contribution
 

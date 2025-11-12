@@ -646,7 +646,9 @@ export default function LandingPage() {
                 </Link>
               ) : plan.name === 'Enterprise' ? (
                 <a
-                  href="mailto:support@community-intelligence.com"
+                  href="https://discord.gg/community-intelligence"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className={`block w-full text-center py-3 rounded-lg font-semibold transition-colors ${
                     plan.popular
                       ? 'bg-blue-600 hover:bg-blue-700'
