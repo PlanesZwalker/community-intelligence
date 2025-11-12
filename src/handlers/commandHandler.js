@@ -1426,5 +1426,87 @@ export const commands = [
       }
     },
   },
+  {
+    name: 'ci-help',
+    description: 'Affiche toutes les commandes disponibles et leur description',
+    execute: async (interaction, client) => {
+      await interaction.deferReply({ ephemeral: true });
+
+      try {
+        const embed = new EmbedBuilder()
+          .setTitle('📚 Commandes Community Intelligence')
+          .setDescription('Voici toutes les commandes disponibles pour analyser et améliorer votre communauté Discord.')
+          .setColor(0x5865F2)
+          .addFields(
+            {
+              name: '📊 Statistiques & Analytics',
+              value: [
+                '`/ci-stats` - Statistiques complètes du serveur',
+                '`/ci-weekly-summary` - Résumé hebdomadaire automatique',
+                '`/ci-sync-history` - Synchroniser l\'historique des messages',
+              ].join('\n'),
+              inline: false,
+            },
+            {
+              name: '🤖 IA & Intelligence',
+              value: [
+                '`/ci-ai-summary` - Résumé intelligent généré par IA',
+                '`/ci-recommendations` - Recommandations d\'engagement',
+                '`/ci-sentiment` - Analyse de sentiment des messages',
+                '`/ci-predictions` - Prédictions et alertes proactives',
+                '`/ci-quest` - Quêtes personnalisées générées par IA',
+              ].join('\n'),
+              inline: false,
+            },
+            {
+              name: '🏆 Gamification',
+              value: [
+                '`/ci-xp` - Voir votre niveau XP et le leaderboard',
+                '`/ci-badges` - Voir vos badges et achievements',
+              ].join('\n'),
+              inline: false,
+            },
+            {
+              name: '🛡️ Sécurité & Modération',
+              value: [
+                '`/ci-bot-detection` - Détecter les bots et spam',
+                '`/ci-trust-score` - Score de confiance d\'un membre',
+              ].join('\n'),
+              inline: false,
+            },
+            {
+              name: '📊 Fonctionnalités Avancées',
+              value: [
+                '`/ci-counter` - Gérer les compteurs de canaux',
+                '`/ci-voice-stats` - Statistiques de l\'activité vocale',
+                '`/ci-mod-report` - Rapport de performance des modérateurs',
+              ].join('\n'),
+              inline: false,
+            },
+            {
+              name: '💳 Premium & Abonnement',
+              value: [
+                '`/ci-upgrade` - Passer à un plan premium',
+                '`/ci-billing` - Gérer votre abonnement',
+                '`/ci-plan` - Voir votre plan actuel',
+              ].join('\n'),
+              inline: false,
+            }
+          )
+          .setFooter({ 
+            text: 'Community Intelligence Bot • Utilisez /ci-help pour voir cette liste à tout moment',
+            iconURL: client.user?.displayAvatarURL()
+          })
+          .setTimestamp();
+
+        await interaction.editReply({ embeds: [embed] });
+      } catch (error) {
+        console.error('Erreur dans /ci-help:', error);
+        await interaction.editReply({
+          content: `❌ Erreur: ${error.message}`,
+        });
+      }
+    },
+  },
 ];
 
