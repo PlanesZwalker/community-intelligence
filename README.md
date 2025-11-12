@@ -249,9 +249,13 @@ Un dashboard web moderne est disponible dans le dossier `dashboard/` pour visual
 Voir la documentation dans le dossier `docs/` (local uniquement) pour les instructions complètes.
 
 **Déploiement rapide sur Vercel :**
-1. Voir la documentation dans le dossier `docs/` (local uniquement)
-2. Suivez le guide `VERCEL_DEPLOY_NOW.md`
-3. Déployez sur Vercel (gratuit) en 2 minutes !
+1. Voir la documentation dans `dashboard/VERCEL_DEPLOY.md`
+2. Connectez votre repo GitHub à Vercel
+3. Configurez le **Root Directory** : `dashboard`
+4. Ajoutez les variables d'environnement Supabase
+5. Déployez en 2 minutes !
+
+📖 **Guide complet** : Voir `dashboard/VERCEL_DEPLOY.md`
 
 ## 📈 Prochaines étapes
 
