@@ -236,7 +236,7 @@ export default function LandingPage() {
                 ))}
               </ul>
               <Link
-                href={plan.name === 'Enterprise' ? 'mailto:support@example.com' : '/dashboard'}
+                href={plan.name === 'Enterprise' ? 'mailto:support@community-intelligence.com' : '/dashboard'}
                 className={`block w-full text-center py-3 rounded-lg font-semibold transition-colors ${
                   plan.popular
                     ? 'bg-blue-600 hover:bg-blue-700'
