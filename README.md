@@ -776,6 +776,7 @@ Le service est conforme au Règlement Général sur la Protection des Données (
 - **[docs/STRIPE_CONFIG_COMPLETE.md](./docs/STRIPE_CONFIG_COMPLETE.md)** : Configuration complète Stripe
 - **[docs/MONETIZATION_PLAN.md](./docs/MONETIZATION_PLAN.md)** : Plan de monétisation détaillé
 - **[docs/IMPLEMENTATION_GUIDE.md](./docs/IMPLEMENTATION_GUIDE.md)** : Guide d'implémentation premium
+- **[docs/SCALABILITY_GUIDE.md](./docs/SCALABILITY_GUIDE.md)** : Guide complet de scalabilité et migration infrastructure
 - **[dashboard/VERCEL_DEPLOY.md](./dashboard/VERCEL_DEPLOY.md)** : Déploiement dashboard Vercel
 - **[PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md)** : Structure complète du projet
 
